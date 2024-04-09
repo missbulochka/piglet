@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.19.6
-// source: api/user_v1/service.proto
+// source: api/proto/service.proto
 
 package user_v1
 
@@ -18,88 +18,232 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// UserV1Client is the client API for UserV1 service.
+// MovieServiceClient is the client API for MovieService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type UserV1Client interface {
-	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
+type MovieServiceClient interface {
+	CreateBill(ctx context.Context, in *CreateBillRequest, opts ...grpc.CallOption) (*CreateBillResponse, error)
+	GetBill(ctx context.Context, in *GetBillRequest, opts ...grpc.CallOption) (*GetBillResponse, error)
+	ReadBills(ctx context.Context, in *ReadBillsRequest, opts ...grpc.CallOption) (*ReadBillsResponse, error)
+	UpdateBill(ctx context.Context, in *UpdateBillRequest, opts ...grpc.CallOption) (*UpdateBillResponse, error)
+	DeleteBill(ctx context.Context, in *DeleteBillRequest, opts ...grpc.CallOption) (*DeleteBillResponse, error)
 }
 
-type userV1Client struct {
+type movieServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewUserV1Client(cc grpc.ClientConnInterface) UserV1Client {
-	return &userV1Client{cc}
+func NewMovieServiceClient(cc grpc.ClientConnInterface) MovieServiceClient {
+	return &movieServiceClient{cc}
 }
 
-func (c *userV1Client) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
-	out := new(GetResponse)
-	err := c.cc.Invoke(ctx, "/hello_world.UserV1/Get", in, out, opts...)
+func (c *movieServiceClient) CreateBill(ctx context.Context, in *CreateBillRequest, opts ...grpc.CallOption) (*CreateBillResponse, error) {
+	out := new(CreateBillResponse)
+	err := c.cc.Invoke(ctx, "/hello_world.MovieService/CreateBill", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// UserV1Server is the server API for UserV1 service.
-// All implementations must embed UnimplementedUserV1Server
+func (c *movieServiceClient) GetBill(ctx context.Context, in *GetBillRequest, opts ...grpc.CallOption) (*GetBillResponse, error) {
+	out := new(GetBillResponse)
+	err := c.cc.Invoke(ctx, "/hello_world.MovieService/GetBill", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *movieServiceClient) ReadBills(ctx context.Context, in *ReadBillsRequest, opts ...grpc.CallOption) (*ReadBillsResponse, error) {
+	out := new(ReadBillsResponse)
+	err := c.cc.Invoke(ctx, "/hello_world.MovieService/ReadBills", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *movieServiceClient) UpdateBill(ctx context.Context, in *UpdateBillRequest, opts ...grpc.CallOption) (*UpdateBillResponse, error) {
+	out := new(UpdateBillResponse)
+	err := c.cc.Invoke(ctx, "/hello_world.MovieService/UpdateBill", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *movieServiceClient) DeleteBill(ctx context.Context, in *DeleteBillRequest, opts ...grpc.CallOption) (*DeleteBillResponse, error) {
+	out := new(DeleteBillResponse)
+	err := c.cc.Invoke(ctx, "/hello_world.MovieService/DeleteBill", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// MovieServiceServer is the server API for MovieService service.
+// All implementations must embed UnimplementedMovieServiceServer
 // for forward compatibility
-type UserV1Server interface {
-	Get(context.Context, *GetRequest) (*GetResponse, error)
-	mustEmbedUnimplementedUserV1Server()
+type MovieServiceServer interface {
+	CreateBill(context.Context, *CreateBillRequest) (*CreateBillResponse, error)
+	GetBill(context.Context, *GetBillRequest) (*GetBillResponse, error)
+	ReadBills(context.Context, *ReadBillsRequest) (*ReadBillsResponse, error)
+	UpdateBill(context.Context, *UpdateBillRequest) (*UpdateBillResponse, error)
+	DeleteBill(context.Context, *DeleteBillRequest) (*DeleteBillResponse, error)
+	mustEmbedUnimplementedMovieServiceServer()
 }
 
-// UnimplementedUserV1Server must be embedded to have forward compatible implementations.
-type UnimplementedUserV1Server struct {
+// UnimplementedMovieServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedMovieServiceServer struct {
 }
 
-func (UnimplementedUserV1Server) Get(context.Context, *GetRequest) (*GetResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+func (UnimplementedMovieServiceServer) CreateBill(context.Context, *CreateBillRequest) (*CreateBillResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateBill not implemented")
 }
-func (UnimplementedUserV1Server) mustEmbedUnimplementedUserV1Server() {}
+func (UnimplementedMovieServiceServer) GetBill(context.Context, *GetBillRequest) (*GetBillResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBill not implemented")
+}
+func (UnimplementedMovieServiceServer) ReadBills(context.Context, *ReadBillsRequest) (*ReadBillsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReadBills not implemented")
+}
+func (UnimplementedMovieServiceServer) UpdateBill(context.Context, *UpdateBillRequest) (*UpdateBillResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateBill not implemented")
+}
+func (UnimplementedMovieServiceServer) DeleteBill(context.Context, *DeleteBillRequest) (*DeleteBillResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteBill not implemented")
+}
+func (UnimplementedMovieServiceServer) mustEmbedUnimplementedMovieServiceServer() {}
 
-// UnsafeUserV1Server may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to UserV1Server will
+// UnsafeMovieServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to MovieServiceServer will
 // result in compilation errors.
-type UnsafeUserV1Server interface {
-	mustEmbedUnimplementedUserV1Server()
+type UnsafeMovieServiceServer interface {
+	mustEmbedUnimplementedMovieServiceServer()
 }
 
-func RegisterUserV1Server(s grpc.ServiceRegistrar, srv UserV1Server) {
-	s.RegisterService(&UserV1_ServiceDesc, srv)
+func RegisterMovieServiceServer(s grpc.ServiceRegistrar, srv MovieServiceServer) {
+	s.RegisterService(&MovieService_ServiceDesc, srv)
 }
 
-func _UserV1_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRequest)
+func _MovieService_CreateBill_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateBillRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserV1Server).Get(ctx, in)
+		return srv.(MovieServiceServer).CreateBill(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/hello_world.UserV1/Get",
+		FullMethod: "/hello_world.MovieService/CreateBill",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserV1Server).Get(ctx, req.(*GetRequest))
+		return srv.(MovieServiceServer).CreateBill(ctx, req.(*CreateBillRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// UserV1_ServiceDesc is the grpc.ServiceDesc for UserV1 service.
+func _MovieService_GetBill_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBillRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MovieServiceServer).GetBill(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/hello_world.MovieService/GetBill",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MovieServiceServer).GetBill(ctx, req.(*GetBillRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MovieService_ReadBills_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReadBillsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MovieServiceServer).ReadBills(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/hello_world.MovieService/ReadBills",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MovieServiceServer).ReadBills(ctx, req.(*ReadBillsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MovieService_UpdateBill_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateBillRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MovieServiceServer).UpdateBill(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/hello_world.MovieService/UpdateBill",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MovieServiceServer).UpdateBill(ctx, req.(*UpdateBillRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MovieService_DeleteBill_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteBillRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MovieServiceServer).DeleteBill(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/hello_world.MovieService/DeleteBill",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MovieServiceServer).DeleteBill(ctx, req.(*DeleteBillRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// MovieService_ServiceDesc is the grpc.ServiceDesc for MovieService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var UserV1_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "hello_world.UserV1",
-	HandlerType: (*UserV1Server)(nil),
+var MovieService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "hello_world.MovieService",
+	HandlerType: (*MovieServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Get",
-			Handler:    _UserV1_Get_Handler,
+			MethodName: "CreateBill",
+			Handler:    _MovieService_CreateBill_Handler,
+		},
+		{
+			MethodName: "GetBill",
+			Handler:    _MovieService_GetBill_Handler,
+		},
+		{
+			MethodName: "ReadBills",
+			Handler:    _MovieService_ReadBills_Handler,
+		},
+		{
+			MethodName: "UpdateBill",
+			Handler:    _MovieService_UpdateBill_Handler,
+		},
+		{
+			MethodName: "DeleteBill",
+			Handler:    _MovieService_DeleteBill_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/user_v1/service.proto",
+	Metadata: "api/proto/service.proto",
 }

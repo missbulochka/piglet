@@ -2,22 +2,59 @@ syntax = "proto3";
 
 package hello_world;
 
-option go_package = "./pkg/user_v1;user_v1";
+option go_package = "pkg/user_v1";
 
-service UserV1 {
-  rpc Get(GetRequest) returns (GetResponse);
+service MovieService {
+  rpc CreateBill(CreateBillRequest) returns (CreateBillResponse) {}
+  rpc GetBill(GetBillRequest) returns (GetBillResponse) {}
+  rpc ReadBills(ReadBillsRequest) returns (ReadBillsResponse) {}
+  rpc UpdateBill(UpdateBillRequest) returns (UpdateBillResponse) {}
+  rpc DeleteBill(DeleteBillRequest) returns (DeleteBillResponse) {}
 }
 
-message UserInfo {
+message Bill {
   int64 id = 1;
-  string name = 2;
-  bool is_human = 3;
+  bool state = 2;
+  string title = 3;
+  float sum = 4;
+  uint32 currency = 5;
 }
 
-message GetRequest {
+message CreateBillRequest {
+  Bill bill = 1;
+}
+
+message CreateBillResponse {
+  Bill bill = 1;
+}
+
+message GetBillRequest{
   int64 id = 1;
 }
 
-message GetResponse {
-  UserInfo info = 1;
+message GetBillResponse{
+  Bill bill = 1;
+}
+message ReadBillsRequest{
+
+}
+
+message ReadBillsResponse{
+  repeated Bill bills = 1;
+}
+
+message UpdateBillRequest{
+  Bill bill = 1;
+}
+
+message UpdateBillResponse{
+  Bill bill = 1;
+}
+
+message DeleteBillRequest{
+  int64 id = 1;
+}
+
+message DeleteBillResponse{
+  bool success = 1;
 }
