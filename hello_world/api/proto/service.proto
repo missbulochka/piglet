@@ -13,7 +13,7 @@ service BillService {
 }
 
 message Bill {
-  int64 id = 1;
+  string id = 1;
   bool state = 2;
   string title = 3;
   float sum = 4;
@@ -52,7 +52,7 @@ message UpdateBillResponse{
 }
 
 message DeleteBillRequest{
-  int64 id = 1;
+  string id = 1;
 }
 
 message DeleteBillResponse{
