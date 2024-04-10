@@ -4,7 +4,7 @@ package hello_world;
 
 option go_package = "./pkg/user_v1";
 
-service MovieService {
+service BillService {
   rpc CreateBill(CreateBillRequest) returns (CreateBillResponse) {}
   rpc GetBill(GetBillRequest) returns (GetBillResponse) {}
   rpc ReadBills(ReadBillsRequest) returns (ReadBillsResponse) {}
