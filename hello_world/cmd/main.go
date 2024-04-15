@@ -10,9 +10,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"hello_world/database"
-	"hello_world/model"
-	desc "hello_world/pkg/user_v1"
+	desc "hello_world/internal/proto"
+	"hello_world/service/database"
+	"hello_world/service/model"
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
