@@ -1,0 +1,6 @@
+*.env
+.dockerignore
+Makefile
+docker/
+deploy/
+.devcontainer

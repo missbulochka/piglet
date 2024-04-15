@@ -4,14 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"hello_world/database"
-	"hello_world/model"
 	"log"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
-	"github.com/google/uuid"
+	"hello_world/database"
+	"hello_world/model"
 	desc "hello_world/pkg/user_v1"
 
+	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -121,7 +124,7 @@ func (*server) DeleteBill(ctx context.Context, req *desc.DeleteBillRequest) (*de
 }
 
 func main() {
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
+	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", grpcPort))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -133,7 +136,17 @@ func main() {
 
 	log.Printf("server listening at %v", lis.Addr())
 
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
+	go func() {
+		if err := s.Serve(lis); err != nil {
+			log.Fatalf("failed to serve: %v", err)
+		}
+	}()
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+
+	<-stop
+	log.Println("Shutting down server...")
+	s.GracefulStop()
+	log.Println("Server stopped")
 }

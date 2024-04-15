@@ -17,17 +17,17 @@ func Init() {
 }
 
 func DatabaseConnection() {
-	host := "localhost"
+	host := "psql"
 	port := "5432"
 	dbName := "bills"
 	dbUser := "postgres"
 	password := "pass1234"
-	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable",
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		host,
-		port,
 		dbUser,
-		dbName,
 		password,
+		dbName,
+		port,
 	)
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	DB.AutoMigrate(&model.Bill{})

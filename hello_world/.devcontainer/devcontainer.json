@@ -1,0 +1,17 @@
+{
+  "name": "dev_hello-world",
+  "dockerComposeFile": [
+    "docker-compose.yml"
+  ],
+  "service": "dev_hello-world",
+  "runServices": [
+    "psql",
+  ],
+  "forwardPorts": [
+    8800,
+  ],
+  "remoteUser": "builder",
+  "updateRemoteUserUID": false,
+  "workspaceFolder": "/workspaces/dev_hello-world",
+  "shutdownAction": "stopCompose"
+}

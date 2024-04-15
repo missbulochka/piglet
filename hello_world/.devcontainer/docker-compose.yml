@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  psql:
+    image: "postgres:16.2"
+    container_name: dev_psql
+    env_file:
+      - ../deploy/psql.env
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  dev_hello-world:
+    build:
+      context: ../
+      dockerfile: ./.devcontainer/build.Dockerfile
+    container_name: dev_hello-world
+    command: tail -f /dev/null
+    ports:
+      - "127.0.0.1:8800:8080"
+    depends_on:
+      psql:
+        condition: service_healthy
+    volumes:
+      - ../:/workspaces/dev_hello-world
+    restart: unless-stopped
