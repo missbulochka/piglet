@@ -2,7 +2,7 @@
 
 # Generate Client and Server code using proto file
 generate:
-	mkdir -p pkg/user_v1
+	mkdir -p internal/proto
 	protoc --go_out=./ --go_opt=paths=import \
     		--go-grpc_out=./ --go-grpc_opt=paths=import \
             api/proto/service.proto
