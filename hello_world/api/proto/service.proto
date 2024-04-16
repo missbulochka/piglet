@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package hello_world;
 
-option go_package = "./pkg/user_v1";
+option go_package = "./internal/proto";
 
 service BillService {
   rpc CreateBill(CreateBillRequest) returns (CreateBillResponse) {}
