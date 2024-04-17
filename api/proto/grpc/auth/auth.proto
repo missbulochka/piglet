@@ -2,12 +2,12 @@ syntax = "proto3";
 
 package auth;
 
-option go_package = "internal/proto/grpc/auth/service";
+option go_package = "internal/proto/grpc/auth/service;authv1";
 
 service Auth {
   rpc Register (RegisterRequest) returns (RegisterResponse);
   rpc Login (LoginRequest) returns (LoginResponse);
-  rpc Update (UpdateRequest) returns (UpdateResponse);
+  rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse);
 }
 
 message RegisterRequest {
@@ -31,7 +31,7 @@ message LoginResponse {
   string token = 1;
 }
 
-message UpdateRequest {
+message UpdateUserRequest {
   string username = 1;
   string email = 2;
   string old_pass = 3;
@@ -39,6 +39,6 @@ message UpdateRequest {
   string con_pass = 5;
 }
 
-message UpdateResponse {
+message UpdateUserResponse {
   bool success = 1;
 }
