@@ -18,6 +18,8 @@ services:
       dockerfile: ./docker/piglet-auth.Dockerfile
     env_file:
       - auth.env
+    ports:
+      - "127.0.0.1:8080:8080"
     depends_on:
       psql:
         condition: service_healthy

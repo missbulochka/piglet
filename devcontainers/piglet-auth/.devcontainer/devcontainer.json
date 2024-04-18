@@ -1,0 +1,14 @@
+{
+  "name": "dev_piglet-auth",
+  "dockerComposeFile": [
+    "../../docker-compose.yaml"
+  ],
+  "service": "dev_piglet-auth",
+  "forwardPorts": [
+    8080,
+  ],
+  "remoteUser": "builder",
+  "updateRemoteUserUID": false,
+  "workspaceFolder": "/workspaces/dev_piglet",
+  "shutdownAction": "stopCompose"
+}

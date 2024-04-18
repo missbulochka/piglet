@@ -1,17 +1,15 @@
-FROM golang:1.21.3 AS builder
-RUN apt-get update -y && apt-get upgrade -y \
-	&& apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+FROM piglet-auth_base:0.1.0 AS builder
 
-WORKDIR /workdpaces/
+WORKDIR /workspaces/piglet
 COPY . .
-RUN go mod download
-RUN go build -o /go/bin/res ./cmd/piglet-auth
+
+RUN go build -o /go/bin/res ./cmd/piglet-auth/main.go
+#CMD ["ls", "-al", ""]
 
 FROM ubuntu:22.04 AS runner
 WORKDIR /app
 ENV CONFIG_PATH="./config/piglet-auth/local.yaml"
-COPY --from=builder /workdpaces/config/piglet-auth ./config/piglet-auth
+COPY --from=builder /workspaces/piglet/config/piglet-auth ./config/piglet-auth
 COPY --from=builder /go/bin/res .
 EXPOSE 8080
 ENTRYPOINT ["./res"]
