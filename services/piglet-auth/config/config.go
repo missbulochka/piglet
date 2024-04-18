@@ -2,7 +2,6 @@ package config
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"time"
 
@@ -46,12 +45,10 @@ func fetchConfigPath() string {
 	// --config="path" or ENV
 	flag.StringVar(&res, "config", "", "path to config file")
 	flag.Parse()
-	fmt.Println("1: ", res)
 
 	if res == "" {
 		res = os.Getenv("CONFIG_PATH")
 	}
-	fmt.Println("2: ", res)
 
 	return res
 }
