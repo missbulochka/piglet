@@ -18,7 +18,7 @@ RUN groupadd --gid ${USER_GID} ${USERNAME} \
 USER ${USERNAME}:${USERNAME}
 
 WORKDIR /workspaces/dev_piglet
-COPY go.mod .
+COPY ../go.mod .
 
 RUN go mod download
 

@@ -4,13 +4,13 @@ services:
   dev_piglet-auth:
     build:
       context: ../
-      dockerfile: ./devcontainers/piglet-auth/.devcontainer/piglet-auth.build.Dockerfile
+      dockerfile: ./.devcontainer/piglet-auth.build.Dockerfile
     container_name: dev_piglet-auth
     command: tail -f /dev/null
     ports:
       - "127.0.0.1:8080:8080"
     env_file:
-      - ../deploy/auth.env
+      - ../auth.env
     volumes:
       - ../:/workspaces/dev_piglet
     restart: unless-stopped

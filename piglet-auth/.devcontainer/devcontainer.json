@@ -1,7 +1,7 @@
 {
   "name": "dev_piglet-auth",
   "dockerComposeFile": [
-    "../../docker-compose.yaml"
+    "docker-compose.yaml"
   ],
   "service": "dev_piglet-auth",
   "forwardPorts": [
