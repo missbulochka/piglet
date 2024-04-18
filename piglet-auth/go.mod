@@ -1,4 +1,4 @@
-module piglet
+module piglet-auth-service
 
 go 1.21.3
 

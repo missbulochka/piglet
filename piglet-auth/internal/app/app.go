@@ -2,7 +2,7 @@ package app
 
 import (
 	"log/slog"
-	grpcapp "piglet/internal/piglet-auth/app/grpc"
+	grpcapp "piglet-auth-service/internal/app/grpc"
 	"time"
 )
 

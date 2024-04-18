@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 	"google.golang.org/grpc"
-	authv1 "piglet/internal/proto/grpc/auth/service"
+	authv1 "piglet-auth-service/api/proto/gen"
 )
 
 type serverAPI struct {

@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.19.6
-// source: api/proto/grpc/auth/auth.proto
+// source: piglet-auth/api/proto/auth.proto
 
 package authv1
 
@@ -173,5 +173,5 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/proto/grpc/auth/auth.proto",
+	Metadata: "piglet-auth/api/proto/auth.proto",
 }

@@ -14,7 +14,7 @@ services:
 
   piglet-auth:
     build:
-      context: ../
+      context: ../piglet-auth/deploy
       dockerfile: ./docker/piglet-auth.Dockerfile
     env_file:
       - auth.env

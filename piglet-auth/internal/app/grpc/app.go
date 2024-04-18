@@ -5,7 +5,7 @@ import (
 	"google.golang.org/grpc"
 	"log/slog"
 	"net"
-	authgrpc "piglet/services/piglet-auth/server"
+	authgrpc "piglet-auth-service/internal/grpc/auth"
 )
 
 type App struct {

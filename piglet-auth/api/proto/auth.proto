@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package auth;
 
-option go_package = "internal/proto/grpc/auth/service;authv1";
+option go_package = "piglet-auth/api/proto/gen;authv1";
 
 service Auth {
   rpc Register (RegisterRequest) returns (RegisterResponse);

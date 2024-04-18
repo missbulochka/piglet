@@ -3,9 +3,9 @@ package main
 import (
 	"log/slog"
 	"os"
-	"piglet/internal/piglet-auth/app"
+	"piglet-auth-service/internal/app"
 
-	config "piglet/services/piglet-auth/config"
+	config "piglet-auth-service/internal/config"
 )
 
 const (
