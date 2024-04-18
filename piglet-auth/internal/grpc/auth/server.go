@@ -14,7 +14,7 @@ type Auth interface {
 		username string,
 		password string,
 	) (token string, err error)
-	Register(
+	RegisterUser(
 		ctx context.Context,
 		username string,
 		email string,
@@ -61,10 +61,10 @@ func (s *serverAPI) Login(
 	}, nil
 }
 
-func (s *serverAPI) Register(
+func (s *serverAPI) RegisterUser(
 	ctx context.Context,
-	req *authv1.RegisterRequest,
-) (*authv1.RegisterResponse, error) {
+	req *authv1.RegisterUserRequest,
+) (*authv1.RegisterUserResponse, error) {
 	// TODO: setup validation
 	if req.GetUsername() == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "username is empty")
@@ -79,13 +79,13 @@ func (s *serverAPI) Register(
 		return nil, status.Errorf(codes.InvalidArgument, "password mismatch")
 	}
 
-	userID, err := s.auth.Register(ctx, req.GetUsername(), req.GetEmail(), req.GetPass())
+	userID, err := s.auth.RegisterUser(ctx, req.GetUsername(), req.GetEmail(), req.GetPass())
 	if err != nil {
 		// TODO ...
 		return nil, status.Errorf(codes.Unauthenticated, "invalid credentials")
 	}
 
-	return &authv1.RegisterResponse{
+	return &authv1.RegisterUserResponse{
 		UserId: userID,
 	}, nil
 }

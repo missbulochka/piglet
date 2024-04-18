@@ -5,19 +5,19 @@ package auth;
 option go_package = "piglet-auth/api/proto/gen;authv1";
 
 service Auth {
-  rpc Register (RegisterRequest) returns (RegisterResponse);
+  rpc RegisterUser (RegisterUserRequest) returns (RegisterUserResponse);
   rpc Login (LoginRequest) returns (LoginResponse);
   rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse);
 }
 
-message RegisterRequest {
+message RegisterUserRequest {
   string username = 1;
   string email = 2;
   string pass = 3;
   string con_pass = 4;
 }
 
-message RegisterResponse {
+message RegisterUserResponse {
   int64 user_id = 1;
 }
 
