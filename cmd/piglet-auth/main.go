@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
+	"piglet/internal/piglet-auth/app"
 
 	config "piglet/services/piglet-auth/config"
 )
@@ -15,15 +15,13 @@ const (
 )
 
 func main() {
-	// TODO: инициализировать объект конфига
 	cfg := config.MustLoad()
 
-	fmt.Println(cfg)
-
-	// TODO: инициализироать логгер
 	log := setupLogger(cfg.Env)
+	log.Info("starting piglet-auth", slog.Any("config", cfg))
 
-	// TODO: инициализировать приложение (app)
+	application := app.New(log, cfg.GRPC.Port, cfg.StoragePath, cfg.TokenTTL)
+	application.GRPCSrv.MustRun()
 
 	// TODO: запустить gRPC-сервер приложения
 }
