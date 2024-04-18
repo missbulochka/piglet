@@ -3,7 +3,9 @@ package main
 import (
 	"log/slog"
 	"os"
+	"os/signal"
 	"piglet-auth-service/internal/app"
+	"syscall"
 
 	config "piglet-auth-service/internal/config"
 )
@@ -23,7 +25,12 @@ func main() {
 	application := app.New(log, cfg.GRPC.Port, cfg.StoragePath, cfg.TokenTTL)
 	application.GRPCSrv.MustRun()
 
-	// TODO: запустить gRPC-сервер приложения
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+
+	<-stop
+	application.GRPCSrv.Stop()
+	log.Info("piglet-auth stopped")
 }
 
 func setupLogger(env string) *slog.Logger {
