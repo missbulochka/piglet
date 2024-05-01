@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package bills;
+
+option go_package = "piglet-bills/api/proto/gen;billsv1";
+
+service pigletBills {
+  rpc createBill (createBillRequest) returns (createBillResponse);
+  rpc getSomeBills (getSomeBillsRequest) returns (getSomeBillsResponse);
+  rpc getBill (getBillRequest) returns (getBillResponse);
+  rpc updateBill (updateBillRequest) returns (updateBillResponse);
+  rpc deleteBill (deleteBillRequest) returns (deleteBillResponse);
+}
+
+message Bill {
+    string id = 1;
+    bool billType = 2;
+    bool billStatus = 3;
+    string billName = 4;
+    float currentSum = 5;
+    reserved 6;
+    google.protobuf.Timestamp date = 7;
+    float monthlyPayment = 8;
+}
+
+message createBillRequest {
+    Bill bill = 1;
+}
+
+message createBillResponse {
+    Bill bill = 1;
+}
+
+message getSomeBillsRequest {
+
+}
+
+message getSomeBillsResponse {
+    repeated Bill bills = 1;
+}
+
+message getBillRequest {
+    string id = 1;
+}
+
+message getBillResponse {
+    Bill bill = 1;
+}
+
+message updateBillRequest {
+    Bill bill = 1;
+}
+
+message updateBillResponse {
+    Bill bill = 1;
+}
+
+message deleteBillRequest {
+    string id = 1;
+}
+
+message deleteBillResponse {
+    bool success = 1;
+}
