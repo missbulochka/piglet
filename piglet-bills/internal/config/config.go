@@ -3,13 +3,13 @@ package config
 import "github.com/kelseyhightower/envconfig"
 
 type Config struct {
-	Env  string `envconfig:"PIGLET_ENV" default:"production"`
+	Env  string `envconfig:"PIGLET_ENV" default:"prod"`
 	GRPC GRPCConfig
 }
 
 type GRPCConfig struct {
 	Server string `evconfig:"PIGLET_BILLS_SERVER" default:"localhost"`
-	Port   string `envconfig:"PIGLET_BILLS_PORT" default:"8080"`
+	Port   int    `envconfig:"PIGLET_BILLS_PORT" default:"8080"`
 }
 
 // InitConfig reads config variables from env and init *Config value
