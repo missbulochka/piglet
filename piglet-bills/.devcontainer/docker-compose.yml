@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  dev_piglet-bills:
+    build:
+      context: ../..
+      dockerfile: piglet-bills/.devcontainer/base.build.Dockerfile
+    container_name: dev_piglet-bills
+    command: tail -f /dev/null
+    ports:
+      - "127.0.0.1:8080:8080"
+    env_file:
+      - ../bills.env
+    volumes:
+      - ../:/workspaces/dev_piglet
+    restart: unless-stopped
