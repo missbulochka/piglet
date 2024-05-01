@@ -3,6 +3,7 @@ package config
 import "github.com/kelseyhightower/envconfig"
 
 type Config struct {
+	Env  string `envconfig:"PIGLET_ENV" default:"production"`
 	GRPC GRPCConfig
 }
 
