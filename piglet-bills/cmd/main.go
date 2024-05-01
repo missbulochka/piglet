@@ -1,7 +1,10 @@
 package main
 
+import "piglet-bills/internal/config"
+
 func main() {
 	// TODO: иницилизировать объект конфига
+	cfg := config.MustLoadConfig()
 
 	// TODO: инициализировать логгер
 
