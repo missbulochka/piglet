@@ -5,4 +5,4 @@ mkdir -p piglet-bills/api/proto/gen
 protoc -I=. \
     --go_out=. \
     --go-grpc_out=. \
-    piglet-bills/api/proto/bills.proto
+    piglet-bills/api/proto/accounting.proto

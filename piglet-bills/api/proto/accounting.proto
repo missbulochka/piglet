@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
 
-package bills;
+package accounting;
 
 option go_package = "piglet-bills/api/proto/gen;billsv1";
 
