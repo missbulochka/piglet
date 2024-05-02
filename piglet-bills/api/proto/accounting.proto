@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-import "google/protobuf/timestamp.proto";
-
 package accounting;
 
 option go_package = "piglet-bills/api/proto/gen;billsv1";
@@ -21,12 +19,15 @@ message Bill {
     string billName = 4;
     float currentSum = 5;
     reserved 6;
-    google.protobuf.Timestamp date = 7;
+    string date = 7;
     float monthlyPayment = 8;
 }
 
 message createBillRequest {
-    Bill bill = 1;
+    bool billType = 1;
+    string billName = 2;
+    reserved 3;
+    string date = 4;
 }
 
 message createBillResponse {
@@ -50,7 +51,11 @@ message getBillResponse {
 }
 
 message updateBillRequest {
-    Bill bill = 1;
+    bool billStatus = 1;
+    string billName = 2;
+    float currentSum = 3;
+    reserved 4;
+    string date = 5;
 }
 
 message updateBillResponse {
