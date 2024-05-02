@@ -15,7 +15,11 @@ type App struct {
 	port       int
 }
 
-func New(log *slog.Logger, server string, port int) *App {
+func New(
+	log *slog.Logger,
+	server string,
+	port int,
+) *App {
 	gRPCServer := grpc.NewServer()
 
 	accountingrpc.Register(gRPCServer)
