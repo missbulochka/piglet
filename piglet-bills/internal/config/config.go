@@ -8,7 +8,7 @@ type Config struct {
 }
 
 type GRPCConfig struct {
-	Server string `evconfig:"PIGLET_BILLS_SERVER" default:"localhost"`
+	Server string `envconfig:"PIGLET_BILLS_SERVER" default:"0.0.0.0"`
 	Port   int    `envconfig:"PIGLET_BILLS_PORT" default:"8080"`
 }
 
