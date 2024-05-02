@@ -2,70 +2,80 @@ package accounting
 
 import (
 	"context"
+	"errors"
+	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"log"
 	billsv1 "piglet-bills-service/api/proto/gen"
+	models "piglet-bills-service/internal/domain/model"
 )
 
 type serverAPI struct {
 	billsv1.UnimplementedPigletBillsServer
-	//accounting Accounting
+	accounting Accounting
 }
 
-//type Accounting interface {
-//	createBill(ctx context.Context,
-//		billType bool,
-//		billStatus bool,
-//		billName string,
-//		currentSum float32,
-//		date time.Time,
-//		monthlyPayment float32,
-//	) (bill models.Bill, err error)
-//	// TODO: несколько счетов, getSomeBills получает массив с id
-//	getSomeBills(ctx context.Context) (bills []models.Bill, err error)
-//	getBill(ctx context.Context, ID string) (bill models.Bill, err error)
-//	updateBill(ctx context.Context,
-//		billType bool,
-//		billStatus bool,
-//		billName string,
-//		currentSum float32,
-//		date time.Time,
-//		monthlyPayment float32,
-//	) (bill models.Bill, err error)
-//	deleteBill(ctx context.Context, ID string) (success bool, err error)
-//}
+type Accounting interface {
+	createBill(ctx context.Context,
+		billType bool,
+		billName string,
+		date string,
+	) (bill models.Bill, err error)
+	getSomeBills(ctx context.Context) (bills []models.Bill, err error)
+	getBill(ctx context.Context, ID string) (bill models.Bill, err error)
+	updateBill(ctx context.Context,
+		billStatus bool,
+		billName string,
+		currentSum float32,
+		date string,
+	) (bill models.Bill, err error)
+	deleteBill(ctx context.Context, ID string) (success bool, err error)
+}
 
-func Register(gRPCServer *grpc.Server) {
-	billsv1.RegisterPigletBillsServer(gRPCServer, &serverAPI{})
+func Register(gRPCServer *grpc.Server, accounting Accounting) {
+	billsv1.RegisterPigletBillsServer(gRPCServer, &serverAPI{accounting: accounting})
 }
 
 func (s *serverAPI) CreateBill(
 	ctx context.Context,
 	req *billsv1.CreateBillRequest,
 ) (*billsv1.CreateBillResponse, error) {
-	// TODO: setup validation
+	bill := models.Bill{
+		BillType: req.GetBillType(),
+		Name:     req.GetBillName(),
+		Date:     req.GetDate(),
+	}
 
-	// TODO: setup logic
+	if err := validation(bill); err != nil {
+		return nil, err
+	}
+
+	bill, err := s.accounting.createBill(ctx, req.GetBillType(), req.GetBillName(), req.GetDate())
+	if err != nil {
+		// TODO: обработка ошибки
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
 
 	return &billsv1.CreateBillResponse{
 		Bill: &billsv1.Bill{
-			Id:             "",
-			BillType:       false,
-			BillStatus:     false,
-			BillName:       "",
-			CurrentSum:     0,
-			Date:           nil,
-			MonthlyPayment: 0,
+			Id:             bill.ID,
+			BillType:       bill.BillType,
+			BillStatus:     bill.BillStatus,
+			BillName:       bill.Name,
+			CurrentSum:     bill.CurrentSum,
+			Date:           bill.Date,
+			MonthlyPayment: bill.MonthlyPayment,
 		},
 	}, nil
 }
 
+// TODO: возврат нескольких счетов, getSomeBills получает массив с id (?)
 func (s *serverAPI) GetSomeBills(
 	ctx context.Context,
 	req *billsv1.GetSomeBillsRequest,
 ) (*billsv1.GetSomeBillsResponse, error) {
-	// TODO: setup validation
-
-	// TODO: setup logic
 	var bills []*billsv1.Bill
 
 	return &billsv1.GetSomeBillsResponse{
@@ -88,7 +98,7 @@ func (s *serverAPI) GetBill(
 			BillStatus:     false,
 			BillName:       "",
 			CurrentSum:     0,
-			Date:           nil,
+			Date:           "",
 			MonthlyPayment: 0,
 		},
 	}, nil
@@ -109,7 +119,7 @@ func (s *serverAPI) UpdateBill(
 			BillStatus:     false,
 			BillName:       "",
 			CurrentSum:     0,
-			Date:           nil,
+			Date:           "",
 			MonthlyPayment: 0,
 		},
 	}, nil
@@ -126,4 +136,23 @@ func (s *serverAPI) DeleteBill(
 	return &billsv1.DeleteBillResponse{
 		Success: true,
 	}, nil
+}
+
+func validation(bill models.Bill) error {
+	val := validator.New(validator.WithRequiredStructEnabled())
+
+	if err := val.Struct(bill); err != nil {
+		var validationErr validator.ValidationErrors
+		if errors.As(err, &validationErr) {
+			log.Println("Validation errors:")
+			for _, err := range validationErr {
+				log.Printf("- Namespace: %s, Field: %s, Tag: %s, ActualTag: %s, Value: %v, Param: %s",
+					err.Namespace(), err.Field(), err.Tag(), err.ActualTag(), err.Value(), err.Param())
+			}
+			return status.Errorf(codes.InvalidArgument, "invalid bill: %v", validationErr)
+		}
+		log.Printf("Validation error: %v", err)
+		return status.Errorf(codes.Internal, "internal error: %v", err)
+	}
+	return nil
 }
