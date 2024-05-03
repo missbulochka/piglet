@@ -1,4 +1,4 @@
-package accounting
+package accountingrpc
 
 import (
 	"context"
@@ -18,20 +18,20 @@ type serverAPI struct {
 }
 
 type Accounting interface {
-	createBill(ctx context.Context,
+	CreateBill(ctx context.Context,
 		billType bool,
 		billName string,
 		date string,
 	) (bill models.Bill, err error)
-	getSomeBills(ctx context.Context) (bills []models.Bill, err error)
-	getBill(ctx context.Context, ID string) (bill models.Bill, err error)
-	updateBill(ctx context.Context,
+	GetSomeBills(ctx context.Context) (bills []models.Bill, err error)
+	GetBill(ctx context.Context, ID string) (bill models.Bill, err error)
+	UpdateBill(ctx context.Context,
 		billStatus bool,
 		billName string,
 		currentSum float32,
 		date string,
 	) (bill models.Bill, err error)
-	deleteBill(ctx context.Context, ID string) (success bool, err error)
+	DeleteBill(ctx context.Context, ID string) (success bool, err error)
 }
 
 func Register(gRPCServer *grpc.Server, accounting Accounting) {
@@ -52,7 +52,7 @@ func (s *serverAPI) CreateBill(
 		return nil, err
 	}
 
-	bill, err := s.accounting.createBill(ctx, req.GetBillType(), req.GetBillName(), req.GetDate())
+	bill, err := s.accounting.CreateBill(ctx, req.GetBillType(), req.GetBillName(), req.GetDate())
 	if err != nil {
 		// TODO: обработка ошибки
 		return nil, status.Errorf(codes.Internal, "internal error")
