@@ -5,11 +5,21 @@ import "github.com/kelseyhightower/envconfig"
 type Config struct {
 	Env  string `envconfig:"PIGLET_ENV" default:"prod"`
 	GRPC GRPCConfig
+	DB   DataBaseConfig
 }
 
 type GRPCConfig struct {
-	Server string `envconfig:"PIGLET_BILLS_SERVER" default:"0.0.0.0"`
-	Port   int    `envconfig:"PIGLET_BILLS_PORT" default:"8080"`
+	GRPCServer string `envconfig:"PIGLET_BILLS_SERVER" default:"0.0.0.0"`
+	GRPCPort   int    `envconfig:"PIGLET_BILLS_PORT" default:"8080"`
+}
+
+type DataBaseConfig struct {
+	StoragePath   string `envconfig:"PIGLET_BILLS_POSTGRES_STORAGE_PATH" default:"var/lib/postgresql/data"`
+	MigrationPath string `envconfig:"PIGLET_BILLS_MIGRATION_PATH" default:"./migration"`
+	UserName      string `envconfig:"PIGLET_BILLS_USER_NAME" default:"postgres"`
+	Password      string `envconfig:"PIGLET_BILLS_PASSWORD" default:"pass1234"`
+	DBPort        string `envconfig:"PIGLET_BILLS_DB_PORT" default:"5432"`
+	DBName        string `envconfig:"PIGLET_BILLS_DB_NAME" default:"Accounting"`
 }
 
 // InitConfig reads config variables from env and init *Config value
