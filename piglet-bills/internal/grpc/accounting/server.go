@@ -14,6 +14,7 @@ import (
 
 	billsv1 "piglet-bills-service/api/proto/gen"
 	models "piglet-bills-service/internal/domain/model"
+	"piglet-bills-service/internal/services/accounting"
 )
 
 type serverAPI struct {
@@ -68,7 +69,10 @@ func (s *serverAPI) CreateBill(
 		req.GetDate(),
 	)
 	if err != nil {
-		// TODO: обработка ошибки
+		if errors.Is(err, accounting.ErrUserExists) {
+			return nil, status.Error(codes.InvalidArgument, "invalid email or password")
+		}
+
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
 
