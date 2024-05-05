@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/shopspring/decimal"
 
 	models "piglet-bills-service/internal/domain/model"
@@ -20,11 +21,12 @@ type Accounting struct {
 }
 
 type BillSaver interface {
-	SaveBill(ctx context.Context,
+	SaveBill(
+		ctx context.Context,
 		billType bool,
 		billName string,
 		currentSum decimal.Decimal,
-		date string,
+		date *timestamp.Timestamp,
 		monthlyPayment decimal.Decimal,
 	) (bill models.Bill, err error)
 }
@@ -53,7 +55,7 @@ func (a *Accounting) CreateBill(
 	billType bool,
 	billName string,
 	currentSum decimal.Decimal,
-	date string,
+	date *timestamp.Timestamp,
 ) (bill models.Bill, err error) {
 	const op = "pigletBills | accounting.saveBill"
 
@@ -62,7 +64,6 @@ func (a *Accounting) CreateBill(
 		// These may be things that are not profitable for business to log
 		slog.String("billType", strconv.FormatBool(billType)),
 		slog.String("billName", billName),
-		slog.String("date", date),
 	)
 
 	monthlyPayment := decimal.New(0, 0)
@@ -76,7 +77,14 @@ func (a *Accounting) CreateBill(
 
 	log.Info("saving bill")
 
-	bill, err = a.billSaver.SaveBill(ctx, billType, billName, currentSum, date, monthlyPayment)
+	bill, err = a.billSaver.SaveBill(
+		ctx,
+		billType,
+		billName,
+		currentSum,
+		date,
+		monthlyPayment,
+	)
 	if err != nil {
 		if errors.Is(err, storage.ErrBillExists) {
 			log.Warn("bill already exists", err)
@@ -93,13 +101,8 @@ func (a *Accounting) CreateBill(
 	return bill, nil
 }
 
-func countPayment(futureDate string, sum decimal.Decimal) (monthlyPayment decimal.Decimal, err error) {
-	const layout = "02-01-2006"
-
-	date, err := time.Parse(layout, futureDate)
-	if err != nil {
-		return decimal.Decimal{}, err
-	}
+func countPayment(futureDate *timestamp.Timestamp, sum decimal.Decimal) (monthlyPayment decimal.Decimal, err error) {
+	date := time.Unix(futureDate.GetSeconds(), int64(futureDate.GetNanos())).UTC()
 
 	// HACK: подумать над функцией поиска (или найти библиотеку)
 	months := int(time.Until(date).Hours() / 24 / 30)

@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/shopspring/decimal"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -26,7 +27,7 @@ type Accounting interface {
 		billType bool,
 		billName string,
 		currentSum decimal.Decimal,
-		date string,
+		date *timestamp.Timestamp,
 	) (bill models.Bill, err error)
 	//GetSomeBills(ctx context.Context) (bills []models.Bill, err error)
 	//GetBill(ctx context.Context, ID string) (bill models.Bill, err error)
@@ -50,19 +51,14 @@ func (s *serverAPI) CreateBill(
 	// HACK: улучшить валидацию (не передавать структуру в целом)
 	if err := validation(
 		validateData{
-			billType:   req.GetBillType(),
-			billName:   req.GetBillName(),
-			currentSum: req.GetCurrentSum(),
-			date:       req.GetDate(),
+			billType: req.GetBillType(),
+			billName: req.GetBillName(),
 		},
 	); err != nil {
 		return nil, err
 	}
 
-	currentSum, err := decimal.NewFromString(req.GetCurrentSum())
-	if err != nil {
-		return nil, err
-	}
+	currentSum := decimal.NewFromInt32(req.GetCurrentSum())
 
 	bill, err := s.accounting.CreateBill(
 		ctx,
@@ -82,9 +78,9 @@ func (s *serverAPI) CreateBill(
 			BillType:       bill.BillType,
 			BillStatus:     bill.BillStatus,
 			BillName:       bill.Name,
-			CurrentSum:     bill.CurrentSum.String(),
+			CurrentSum:     int32(bill.CurrentSum.IntPart()),
 			Date:           bill.Date,
-			MonthlyPayment: bill.MonthlyPayment.String(),
+			MonthlyPayment: uint32(bill.MonthlyPayment.IntPart()),
 		},
 	}, nil
 }
@@ -115,9 +111,9 @@ func (s *serverAPI) GetBill(
 			BillType:       false,
 			BillStatus:     false,
 			BillName:       "",
-			CurrentSum:     "0",
-			Date:           "",
-			MonthlyPayment: "0",
+			CurrentSum:     0,
+			Date:           nil,
+			MonthlyPayment: 0,
 		},
 	}, nil
 }
@@ -136,9 +132,9 @@ func (s *serverAPI) UpdateBill(
 			BillType:       false,
 			BillStatus:     false,
 			BillName:       "",
-			CurrentSum:     "0",
-			Date:           "",
-			MonthlyPayment: "0",
+			CurrentSum:     0,
+			Date:           nil,
+			MonthlyPayment: 0,
 		},
 	}, nil
 }
@@ -178,8 +174,6 @@ func validation(
 }
 
 type validateData struct {
-	billType   bool   `validate:"boolean"`
-	billName   string `validate:"required"`
-	currentSum string `validate:"regex=^\\d+(\\.\\d{1,3})?$"`
-	date       string `validate:"datetime=02-01-2006"`
+	billType bool   `validate:"boolean"`
+	billName string `validate:"required"`
 }
