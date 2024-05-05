@@ -1,11 +1,13 @@
 package models
 
+import "github.com/shopspring/decimal"
+
 type Bill struct {
 	ID             string
-	BillType       bool `validate:"required"`
+	BillType       bool `validate:"boolean"`
 	BillStatus     bool
 	Name           string `validate:"required"`
-	CurrentSum     float32
-	Date           string `validate:"required,datetime=2006-01-02"`
-	MonthlyPayment float32
+	CurrentSum     decimal.Decimal
+	Date           string `validate:"required,datetime=02-01-2006"`
+	MonthlyPayment decimal.Decimal
 }

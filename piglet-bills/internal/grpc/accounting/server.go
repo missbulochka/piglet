@@ -66,9 +66,9 @@ func (s *serverAPI) CreateBill(
 			BillType:       bill.BillType,
 			BillStatus:     bill.BillStatus,
 			BillName:       bill.Name,
-			CurrentSum:     bill.CurrentSum,
+			CurrentSum:     "0",
 			Date:           bill.Date,
-			MonthlyPayment: bill.MonthlyPayment,
+			MonthlyPayment: "0",
 		},
 	}, nil
 }
@@ -99,9 +99,9 @@ func (s *serverAPI) GetBill(
 			BillType:       false,
 			BillStatus:     false,
 			BillName:       "",
-			CurrentSum:     0,
+			CurrentSum:     "0",
 			Date:           "",
-			MonthlyPayment: 0,
+			MonthlyPayment: "0",
 		},
 	}, nil
 }
@@ -120,9 +120,9 @@ func (s *serverAPI) UpdateBill(
 			BillType:       false,
 			BillStatus:     false,
 			BillName:       "",
-			CurrentSum:     0,
+			CurrentSum:     "0",
 			Date:           "",
-			MonthlyPayment: 0,
+			MonthlyPayment: "0",
 		},
 	}, nil
 }

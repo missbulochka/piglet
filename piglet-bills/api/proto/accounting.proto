@@ -17,10 +17,10 @@ message Bill {
     bool billType = 2;
     bool billStatus = 3;
     string billName = 4;
-    float currentSum = 5;
+    string currentSum = 5;
     reserved 6;
     string date = 7;
-    float monthlyPayment = 8;
+    string monthlyPayment = 8;
 }
 
 message createBillRequest {

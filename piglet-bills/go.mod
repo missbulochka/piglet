@@ -7,6 +7,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.17.1
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.0
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/shopspring/decimal v1.2.0
 	google.golang.org/grpc v1.63.2
 	google.golang.org/protobuf v1.34.0
 )
