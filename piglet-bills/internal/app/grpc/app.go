@@ -2,9 +2,11 @@ package grpcapp
 
 import (
 	"fmt"
-	"google.golang.org/grpc"
 	"log/slog"
 	"net"
+
+	"google.golang.org/grpc"
+
 	accountingrpc "piglet-bills-service/internal/grpc/accounting"
 )
 
@@ -12,17 +14,18 @@ type App struct {
 	log        *slog.Logger
 	gRPCServer *grpc.Server
 	server     string
-	port       int
+	port       string
 }
 
 func New(
 	log *slog.Logger,
+	accountingService accountingrpc.Accounting,
 	server string,
-	port int,
+	port string,
 ) *App {
 	gRPCServer := grpc.NewServer()
 
-	accountingrpc.Register(gRPCServer)
+	accountingrpc.Register(gRPCServer, accountingService)
 
 	return &App{
 		log:        log,
@@ -33,20 +36,20 @@ func New(
 }
 
 func (a *App) MustStart() {
-	if err := a.Start(); err != nil {
+	if err := a.start(); err != nil {
 		panic(err)
 	}
 }
 
-func (a *App) Start() error {
+func (a *App) start() error {
 	const op = "piglet-bills | grpcapp.Start"
 
 	log := a.log.With(
 		slog.String("op", op),
-		slog.Int("port", a.port),
+		slog.String("port", a.port),
 	)
 
-	l, err := net.Listen("tcp", fmt.Sprintf("%s:%d", a.server, a.port))
+	l, err := net.Listen("tcp", fmt.Sprintf("%s:%s", a.server, a.port))
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
@@ -63,7 +66,7 @@ func (a *App) Stop() {
 	const op = "piglet-bills | grpcapp.Stop"
 
 	a.log.With(slog.String("op", op)).
-		Info("stopping grpc server", slog.Int("port", a.port))
+		Info("stopping grpc server", slog.String("port", a.port))
 
 	a.gRPCServer.GracefulStop()
 }
