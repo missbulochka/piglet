@@ -1,4 +1,4 @@
-# Piglet authorization service
+# Piglet-bills service
 
 This README file is for the piglet-bills service, which manages bills and goals.
 
@@ -23,14 +23,54 @@ You can use devcontainers/cli to set up environment and build the project manual
 # build the docker image
 docker build \
         -t piglet_base:0.1.0 \
-        -f piglet-bills/.devcontainer/base.build.Dockerfile \
+        -f .devcontainer/base.build.Dockerfile \
         ./
 
 # start the dev container
-devcontainer up --workspace-folder piglet-bills
+devcontainer up --workspace-folder .
 ```
 
 You can run the application with the following command:
 ```bash
-devcontainer exec --workspace-folder piglet-bills go run /workspaces/dev_piglet/cmd/main.go
+devcontainer exec --workspace-folder . go run /workspaces/dev_piglet/cmd/main.go
+```
+
+## Database (PostgreSQL)
+
+To manage the databases for the Piglet-bill service locally, you can use the following commands
+(you should export or fill POSTGRES_USER, POSTGRES_PASSWORD, HOST, PORT, POSTGRES_DB).
+
+### Work with database
+
+Use the following commands to create and delete database required for the Piglet-bills service:
+```bash
+# create database
+docker exec \
+        -it bills_psql \
+        createdb --username=$POSTGRES_USER --owner=$POSTGRES_USER \
+        Accounting
+
+# delete database 
+docker exec \
+        -it bills_psql \
+        dropdb --username=$POSTGRES_USER \
+        Accounting
+```
+
+### Work with database
+
+To run migrations for the Piglet-bills service locally, use the following commands.
+
+```bash
+# migrate up
+migrate -path piglet-bills/migration \
+        -database "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$HOST:$PORT/$POSTGRES_DB?sslmode=disable" \
+        -verbose \
+        up
+
+# migrate down
+migrate -path piglet-bills/migration \
+        -database "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$HOST:$PORT/$POSTGRES_DB?sslmode=disable" \
+        -verbose \
+        down
 ```
