@@ -1,6 +1,22 @@
 version: '3.8'
 
 services:
+  bills_psql:
+    image: "postgres:16.2"
+    container_name: bills_psql
+    ports:
+      - "127.0.0.1:5432:5432"
+    env_file:
+      - ../pg-db.env
+    volumes:
+      - ../pg-storage:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   dev_piglet-bills:
     build:
       context: ../..
@@ -9,6 +25,9 @@ services:
     command: tail -f /dev/null
     ports:
       - "127.0.0.1:8080:8080"
+    depends_on:
+      bills_psql:
+        condition: service_healthy
     env_file:
       - ../bills.env
     volumes:

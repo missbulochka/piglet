@@ -4,6 +4,9 @@
     "docker-compose.yml"
   ],
   "service": "dev_piglet-bills",
+  "runServices": [
+    "bills_psql",
+  ],
   "forwardPorts": [
     8080,
   ],
