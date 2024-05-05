@@ -23,15 +23,15 @@ type Accounting interface {
 		billName string,
 		date string,
 	) (bill models.Bill, err error)
-	GetSomeBills(ctx context.Context) (bills []models.Bill, err error)
-	GetBill(ctx context.Context, ID string) (bill models.Bill, err error)
-	UpdateBill(ctx context.Context,
-		billStatus bool,
-		billName string,
-		currentSum float32,
-		date string,
-	) (bill models.Bill, err error)
-	DeleteBill(ctx context.Context, ID string) (success bool, err error)
+	//GetSomeBills(ctx context.Context) (bills []models.Bill, err error)
+	//GetBill(ctx context.Context, ID string) (bill models.Bill, err error)
+	//UpdateBill(ctx context.Context,
+	//	billStatus bool,
+	//	billName string,
+	//	currentSum float32,
+	//	date string,
+	//) (bill models.Bill, err error)
+	//DeleteBill(ctx context.Context, ID string) (success bool, err error)
 }
 
 func Register(gRPCServer *grpc.Server, accounting Accounting) {
@@ -41,7 +41,7 @@ func Register(gRPCServer *grpc.Server, accounting Accounting) {
 func (s *serverAPI) CreateBill(
 	ctx context.Context,
 	req *billsv1.CreateBillRequest,
-) (*billsv1.CreateBillResponse, error) {
+) (*billsv1.BillResponse, error) {
 	bill := models.Bill{
 		BillType: req.GetBillType(),
 		Name:     req.GetBillName(),
@@ -58,7 +58,7 @@ func (s *serverAPI) CreateBill(
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
 
-	return &billsv1.CreateBillResponse{
+	return &billsv1.BillResponse{
 		Bill: &billsv1.Bill{
 			Id:             bill.ID,
 			BillType:       bill.BillType,
@@ -86,12 +86,12 @@ func (s *serverAPI) GetSomeBills(
 func (s *serverAPI) GetBill(
 	ctx context.Context,
 	req *billsv1.GetBillRequest,
-) (*billsv1.GetBillResponse, error) {
+) (*billsv1.BillResponse, error) {
 	// TODO: setup validation
 
 	// TODO: setup logic
 
-	return &billsv1.GetBillResponse{
+	return &billsv1.BillResponse{
 		Bill: &billsv1.Bill{
 			Id:             "",
 			BillType:       false,
@@ -107,12 +107,12 @@ func (s *serverAPI) GetBill(
 func (s *serverAPI) UpdateBill(
 	ctx context.Context,
 	req *billsv1.UpdateBillRequest,
-) (*billsv1.UpdateBillResponse, error) {
+) (*billsv1.BillResponse, error) {
 	// TODO: setup validation
 
 	// TODO: setup logic
 
-	return &billsv1.UpdateBillResponse{
+	return &billsv1.BillResponse{
 		Bill: &billsv1.Bill{
 			Id:             "",
 			BillType:       false,
