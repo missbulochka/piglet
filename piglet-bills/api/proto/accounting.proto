@@ -27,7 +27,8 @@ message createBillRequest {
     bool billType = 1;
     string billName = 2;
     reserved 3;
-    string date = 4;
+    string currentSum = 4;
+    string date = 5;
 }
 
 message BillResponse {
