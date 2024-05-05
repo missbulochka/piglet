@@ -10,7 +10,7 @@ type Config struct {
 
 type GRPCConfig struct {
 	GRPCServer string `envconfig:"PIGLET_BILLS_SERVER" default:"0.0.0.0"`
-	GRPCPort   int    `envconfig:"PIGLET_BILLS_PORT" default:"8080"`
+	GRPCPort   string `envconfig:"PIGLET_BILLS_PORT" default:"8080"`
 }
 
 type DataBaseConfig struct {
