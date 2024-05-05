@@ -4,10 +4,10 @@ import "github.com/shopspring/decimal"
 
 type Bill struct {
 	ID             string
-	BillType       bool `validate:"boolean"`
+	BillType       bool
 	BillStatus     bool
-	Name           string `validate:"required"`
+	Name           string
 	CurrentSum     decimal.Decimal
-	Date           string `validate:"required,datetime=02-01-2006"`
+	Date           string
 	MonthlyPayment decimal.Decimal
 }

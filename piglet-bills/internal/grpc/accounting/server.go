@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/shopspring/decimal"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -20,9 +21,11 @@ type serverAPI struct {
 }
 
 type Accounting interface {
-	CreateBill(ctx context.Context,
+	CreateBill(
+		ctx context.Context,
 		billType bool,
 		billName string,
+		currentSum decimal.Decimal,
 		date string,
 	) (bill models.Bill, err error)
 	//GetSomeBills(ctx context.Context) (bills []models.Bill, err error)
@@ -44,17 +47,30 @@ func (s *serverAPI) CreateBill(
 	ctx context.Context,
 	req *billsv1.CreateBillRequest,
 ) (*billsv1.BillResponse, error) {
-	bill := models.Bill{
-		BillType: req.GetBillType(),
-		Name:     req.GetBillName(),
-		Date:     req.GetDate(),
-	}
-
-	if err := validation(bill); err != nil {
+	// HACK: улучшить валидацию (не передавать структуру в целом)
+	if err := validation(
+		validateData{
+			billType:   req.GetBillType(),
+			billName:   req.GetBillName(),
+			currentSum: req.GetCurrentSum(),
+			date:       req.GetDate(),
+		},
+	); err != nil {
 		return nil, err
 	}
 
-	bill, err := s.accounting.CreateBill(ctx, req.GetBillType(), req.GetBillName(), req.GetDate())
+	currentSum, err := decimal.NewFromString(req.GetCurrentSum())
+	if err != nil {
+		return nil, err
+	}
+
+	bill, err := s.accounting.CreateBill(
+		ctx,
+		req.GetBillType(),
+		req.GetBillName(),
+		currentSum,
+		req.GetDate(),
+	)
 	if err != nil {
 		// TODO: обработка ошибки
 		return nil, status.Errorf(codes.Internal, "internal error")
@@ -140,10 +156,12 @@ func (s *serverAPI) DeleteBill(
 	}, nil
 }
 
-func validation(bill models.Bill) error {
+func validation(
+	vd validateData,
+) error {
 	val := validator.New(validator.WithRequiredStructEnabled())
 
-	if err := val.Struct(bill); err != nil {
+	if err := val.Struct(vd); err != nil {
 		var validationErr validator.ValidationErrors
 		if errors.As(err, &validationErr) {
 			log.Println("Validation errors:")
@@ -157,4 +175,11 @@ func validation(bill models.Bill) error {
 		return status.Errorf(codes.Internal, "internal error: %v", err)
 	}
 	return nil
+}
+
+type validateData struct {
+	billType   bool   `validate:"boolean"`
+	billName   string `validate:"required"`
+	currentSum string `validate:"regex=^\\d+(\\.\\d{1,3})?$"`
+	date       string `validate:"datetime=02-01-2006"`
 }

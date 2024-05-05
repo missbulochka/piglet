@@ -5,7 +5,6 @@ go 1.21.3
 require (
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/golang-migrate/migrate/v4 v4.17.1
-	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/shopspring/decimal v1.2.0
 	google.golang.org/grpc v1.63.2
@@ -18,6 +17,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 	go.uber.org/atomic v1.7.0 // indirect

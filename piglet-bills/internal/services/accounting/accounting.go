@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"log/slog"
 	"strconv"
+	"time"
+
+	"github.com/shopspring/decimal"
 
 	models "piglet-bills-service/internal/domain/model"
 	"piglet-bills-service/internal/storage"
@@ -20,8 +23,9 @@ type BillSaver interface {
 	SaveBill(ctx context.Context,
 		billType bool,
 		billName string,
+		currentSum decimal.Decimal,
 		date string,
-		monthlyPayment float32,
+		monthlyPayment decimal.Decimal,
 	) (bill models.Bill, err error)
 }
 
@@ -48,6 +52,7 @@ func (a *Accounting) CreateBill(
 	ctx context.Context,
 	billType bool,
 	billName string,
+	currentSum decimal.Decimal,
 	date string,
 ) (bill models.Bill, err error) {
 	const op = "pigletBills | accounting.saveBill"
@@ -60,17 +65,18 @@ func (a *Accounting) CreateBill(
 		slog.String("date", date),
 	)
 
-	log.Info("saving bill")
+	monthlyPayment := decimal.New(0, 0)
+	if billType == false {
+		if monthlyPayment, err = countPayment(date, currentSum); err != nil {
+			log.Warn("something wrong with date", err)
 
-	var monthlyPayment float32
-	if billType == true {
-		monthlyPayment = 0
-	} else {
-		// TODO: вычисление помесячного платежа
-		monthlyPayment = 0
+			return models.Bill{}, fmt.Errorf("%s: %w", op, err)
+		}
 	}
 
-	bill, err = a.billSaver.SaveBill(ctx, billType, billName, date, monthlyPayment)
+	log.Info("saving bill")
+
+	bill, err = a.billSaver.SaveBill(ctx, billType, billName, currentSum, date, monthlyPayment)
 	if err != nil {
 		if errors.Is(err, storage.ErrBillExists) {
 			log.Warn("bill already exists", err)
@@ -85,4 +91,24 @@ func (a *Accounting) CreateBill(
 
 	log.Info("saved bill")
 	return bill, nil
+}
+
+func countPayment(futureDate string, sum decimal.Decimal) (monthlyPayment decimal.Decimal, err error) {
+	const layout = "02-01-2006"
+
+	date, err := time.Parse(layout, futureDate)
+	if err != nil {
+		return decimal.Decimal{}, err
+	}
+
+	// HACK: подумать над функцией поиска (или найти библиотеку)
+	months := int(time.Until(date).Hours() / 24 / 30)
+
+	if months == 0 {
+		return sum, nil
+	}
+
+	monthlyPayment = sum.Div(decimal.New(int64(months), 0))
+
+	return monthlyPayment.Round(0), nil
 }

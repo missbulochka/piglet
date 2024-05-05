@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/shopspring/decimal"
 
 	models "piglet-bills-service/internal/domain/model"
 )
@@ -37,8 +38,9 @@ func New(
 func (s *Storage) SaveBill(ctx context.Context,
 	billType bool,
 	billName string,
+	currentSum decimal.Decimal,
 	date string,
-	monthlyPayment float32,
+	monthlyPayment decimal.Decimal,
 ) (bill models.Bill, err error) {
 	const op = "piglet-bills | storage.psql.SaveBill"
 
