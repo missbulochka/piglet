@@ -1,6 +1,6 @@
 CREATE TABLE "bills" (
     "id" uuid PRIMARY KEY,
-    "billName" VARCHAR(255) NOT NULL,
+    "billName" VARCHAR(255) NOT NULL UNIQUE,
     "currentSum" decimal,
     "created_at" timestamptz DEFAULT (now())
 );

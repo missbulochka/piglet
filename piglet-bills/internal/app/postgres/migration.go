@@ -1,55 +1,23 @@
-package psqlapp
+package postgres
 
 import (
 	"errors"
 	"fmt"
+
+	// Библиотека миграций
 	"github.com/golang-migrate/migrate/v4"
+	// Драйвер для выполнения миграций postgres
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	// Драйвер для получения миграция из файлов
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"log/slog"
 )
 
-type MigrationApp struct {
-	log           *slog.Logger
-	migrationPath string
-	DBHost        string
-	DBPort        string
-	DBName        string
-}
-
-func New(
-	log *slog.Logger,
-	migrationPath string,
-	DBPort string,
-	DBName string,
-) *MigrationApp {
-	return &MigrationApp{
-		log:           log,
-		migrationPath: migrationPath,
-		DBHost:        "bills_psql",
-		DBPort:        DBPort,
-		DBName:        DBName,
-	}
-}
-
-func (m *MigrationApp) MustRunMigrations() {
-	if err := m.runMigration(); err != nil {
-		panic(err)
-	}
-}
-
-func (m *MigrationApp) runMigration() error {
-	const op = "piglet-bills | psql.RunMigration"
-
-	m.log = m.log.With(
-		slog.String("op", op),
-		slog.String("migration path", m.migrationPath),
-		slog.String("database name", m.DBName),
-	)
+func RunMigration(sourceURL string, databaseURL string) error {
+	const op = "piglet-bills | psqlapp.RunMigration"
 
 	migration, err := migrate.New(
-		"file://"+m.migrationPath,
-		fmt.Sprintf("postgres://%s:%s/%s?sslmode=enable", m.DBHost, m.DBPort, m.DBName),
+		sourceURL,
+		databaseURL,
 	)
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
@@ -59,6 +27,6 @@ func (m *MigrationApp) runMigration() error {
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
-	m.log.Info("migrated successfully")
+	fmt.Println("migrated successfully")
 	return nil
 }

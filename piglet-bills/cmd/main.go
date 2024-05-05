@@ -20,14 +20,18 @@ func main() {
 	cfg := config.MustLoadConfig()
 
 	log := setupLogger(cfg.Env)
-	log.Info("starting piglet-bills service", slog.Any("config", cfg))
+	// Not very good practice: send all config to logs
+	// log.Info("starting piglet-bills service", slog.Any("config", cfg))
+	log.Info("starting piglet-bills service")
 
 	application := app.New(
 		log,
 		cfg.GRPC.GRPCServer,
 		cfg.GRPC.GRPCPort,
-		cfg.DB.StoragePath,
 		cfg.DB.MigrationPath,
+		cfg.DB.UserName,
+		cfg.DB.Password,
+		cfg.DB.DBHost,
 		cfg.DB.DBPort,
 		cfg.DB.DBName,
 	)

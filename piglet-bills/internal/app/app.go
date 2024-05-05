@@ -1,9 +1,14 @@
 package app
 
 import (
+	"fmt"
 	"log/slog"
+	pgmigration "piglet-bills-service/internal/app/postgres"
+
+	"piglet-bills-service/internal/services/accounting"
+	"piglet-bills-service/internal/storage/psql"
+
 	grpcapp "piglet-bills-service/internal/app/grpc"
-	psqlapp "piglet-bills-service/internal/app/postgres"
 )
 
 type App struct {
@@ -13,25 +18,36 @@ type App struct {
 func New(
 	log *slog.Logger,
 	grpcServer string,
-	grpcPort int,
-	storagePath string,
+	grpcPort string,
 	migrationPath string,
+	dbUser string,
+	dbPassword string,
+	dbHost string,
 	dbPort string,
 	dbName string,
 ) *App {
-	// TODO: инициализировать хранилище
+	if err := pgmigration.RunMigration(
+		"file://"+migrationPath,
+		fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable",
+			dbUser, dbPassword, dbHost, dbPort, dbName),
+	); err != nil {
+		panic(err)
+	}
 
-	migrationApp := psqlapp.New(
-		log,
-		migrationPath,
+	storage, err := psql.New(
+		dbHost,
 		dbPort,
+		dbUser,
+		dbPassword,
 		dbName,
 	)
-	migrationApp.MustRunMigrations()
+	if err != nil {
+		panic(err)
+	}
 
-	// TODO: инициализировать сервис
+	accountingService := accounting.New(log, storage)
 
-	grpcApp := grpcapp.New(log, grpcServer, grpcPort)
+	grpcApp := grpcapp.New(log, accountingService, grpcServer, grpcPort)
 	return &App{
 		GRPCSrv: grpcApp,
 	}
