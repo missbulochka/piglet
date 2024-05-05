@@ -3,12 +3,12 @@ package app
 import (
 	"fmt"
 	"log/slog"
-	pgmigration "piglet-bills-service/internal/app/postgres"
 
 	"piglet-bills-service/internal/services/accounting"
 	"piglet-bills-service/internal/storage/psql"
 
 	grpcapp "piglet-bills-service/internal/app/grpc"
+	pgmigration "piglet-bills-service/internal/storage/pg-migration"
 )
 
 type App struct {
