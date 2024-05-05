@@ -22,10 +22,10 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PigletBillsClient interface {
-	CreateBill(ctx context.Context, in *CreateBillRequest, opts ...grpc.CallOption) (*CreateBillResponse, error)
+	CreateBill(ctx context.Context, in *CreateBillRequest, opts ...grpc.CallOption) (*BillResponse, error)
 	GetSomeBills(ctx context.Context, in *GetSomeBillsRequest, opts ...grpc.CallOption) (*GetSomeBillsResponse, error)
-	GetBill(ctx context.Context, in *GetBillRequest, opts ...grpc.CallOption) (*GetBillResponse, error)
-	UpdateBill(ctx context.Context, in *UpdateBillRequest, opts ...grpc.CallOption) (*UpdateBillResponse, error)
+	GetBill(ctx context.Context, in *GetBillRequest, opts ...grpc.CallOption) (*BillResponse, error)
+	UpdateBill(ctx context.Context, in *UpdateBillRequest, opts ...grpc.CallOption) (*BillResponse, error)
 	DeleteBill(ctx context.Context, in *DeleteBillRequest, opts ...grpc.CallOption) (*DeleteBillResponse, error)
 }
 
@@ -37,8 +37,8 @@ func NewPigletBillsClient(cc grpc.ClientConnInterface) PigletBillsClient {
 	return &pigletBillsClient{cc}
 }
 
-func (c *pigletBillsClient) CreateBill(ctx context.Context, in *CreateBillRequest, opts ...grpc.CallOption) (*CreateBillResponse, error) {
-	out := new(CreateBillResponse)
+func (c *pigletBillsClient) CreateBill(ctx context.Context, in *CreateBillRequest, opts ...grpc.CallOption) (*BillResponse, error) {
+	out := new(BillResponse)
 	err := c.cc.Invoke(ctx, "/accounting.pigletBills/createBill", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -55,8 +55,8 @@ func (c *pigletBillsClient) GetSomeBills(ctx context.Context, in *GetSomeBillsRe
 	return out, nil
 }
 
-func (c *pigletBillsClient) GetBill(ctx context.Context, in *GetBillRequest, opts ...grpc.CallOption) (*GetBillResponse, error) {
-	out := new(GetBillResponse)
+func (c *pigletBillsClient) GetBill(ctx context.Context, in *GetBillRequest, opts ...grpc.CallOption) (*BillResponse, error) {
+	out := new(BillResponse)
 	err := c.cc.Invoke(ctx, "/accounting.pigletBills/getBill", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -64,8 +64,8 @@ func (c *pigletBillsClient) GetBill(ctx context.Context, in *GetBillRequest, opt
 	return out, nil
 }
 
-func (c *pigletBillsClient) UpdateBill(ctx context.Context, in *UpdateBillRequest, opts ...grpc.CallOption) (*UpdateBillResponse, error) {
-	out := new(UpdateBillResponse)
+func (c *pigletBillsClient) UpdateBill(ctx context.Context, in *UpdateBillRequest, opts ...grpc.CallOption) (*BillResponse, error) {
+	out := new(BillResponse)
 	err := c.cc.Invoke(ctx, "/accounting.pigletBills/updateBill", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -86,10 +86,10 @@ func (c *pigletBillsClient) DeleteBill(ctx context.Context, in *DeleteBillReques
 // All implementations must embed UnimplementedPigletBillsServer
 // for forward compatibility
 type PigletBillsServer interface {
-	CreateBill(context.Context, *CreateBillRequest) (*CreateBillResponse, error)
+	CreateBill(context.Context, *CreateBillRequest) (*BillResponse, error)
 	GetSomeBills(context.Context, *GetSomeBillsRequest) (*GetSomeBillsResponse, error)
-	GetBill(context.Context, *GetBillRequest) (*GetBillResponse, error)
-	UpdateBill(context.Context, *UpdateBillRequest) (*UpdateBillResponse, error)
+	GetBill(context.Context, *GetBillRequest) (*BillResponse, error)
+	UpdateBill(context.Context, *UpdateBillRequest) (*BillResponse, error)
 	DeleteBill(context.Context, *DeleteBillRequest) (*DeleteBillResponse, error)
 	mustEmbedUnimplementedPigletBillsServer()
 }
@@ -98,16 +98,16 @@ type PigletBillsServer interface {
 type UnimplementedPigletBillsServer struct {
 }
 
-func (UnimplementedPigletBillsServer) CreateBill(context.Context, *CreateBillRequest) (*CreateBillResponse, error) {
+func (UnimplementedPigletBillsServer) CreateBill(context.Context, *CreateBillRequest) (*BillResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateBill not implemented")
 }
 func (UnimplementedPigletBillsServer) GetSomeBills(context.Context, *GetSomeBillsRequest) (*GetSomeBillsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSomeBills not implemented")
 }
-func (UnimplementedPigletBillsServer) GetBill(context.Context, *GetBillRequest) (*GetBillResponse, error) {
+func (UnimplementedPigletBillsServer) GetBill(context.Context, *GetBillRequest) (*BillResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBill not implemented")
 }
-func (UnimplementedPigletBillsServer) UpdateBill(context.Context, *UpdateBillRequest) (*UpdateBillResponse, error) {
+func (UnimplementedPigletBillsServer) UpdateBill(context.Context, *UpdateBillRequest) (*BillResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateBill not implemented")
 }
 func (UnimplementedPigletBillsServer) DeleteBill(context.Context, *DeleteBillRequest) (*DeleteBillResponse, error) {

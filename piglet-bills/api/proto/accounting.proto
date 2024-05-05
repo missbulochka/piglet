@@ -5,10 +5,10 @@ package accounting;
 option go_package = "piglet-bills/api/proto/gen;billsv1";
 
 service pigletBills {
-  rpc createBill (createBillRequest) returns (createBillResponse);
+  rpc createBill (createBillRequest) returns (BillResponse);
   rpc getSomeBills (getSomeBillsRequest) returns (getSomeBillsResponse);
-  rpc getBill (getBillRequest) returns (getBillResponse);
-  rpc updateBill (updateBillRequest) returns (updateBillResponse);
+  rpc getBill (getBillRequest) returns (BillResponse);
+  rpc updateBill (updateBillRequest) returns (BillResponse);
   rpc deleteBill (deleteBillRequest) returns (deleteBillResponse);
 }
 
@@ -30,7 +30,7 @@ message createBillRequest {
     string date = 4;
 }
 
-message createBillResponse {
+message BillResponse {
     Bill bill = 1;
 }
 
@@ -46,20 +46,12 @@ message getBillRequest {
     string id = 1;
 }
 
-message getBillResponse {
-    Bill bill = 1;
-}
-
 message updateBillRequest {
     bool billStatus = 1;
     string billName = 2;
     float currentSum = 3;
     reserved 4;
     string date = 5;
-}
-
-message updateBillResponse {
-    Bill bill = 1;
 }
 
 message deleteBillRequest {
