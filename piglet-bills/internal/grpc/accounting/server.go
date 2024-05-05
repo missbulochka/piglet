@@ -3,11 +3,13 @@ package accountingrpc
 import (
 	"context"
 	"errors"
+	"log"
+
 	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"log"
+
 	billsv1 "piglet-bills-service/api/proto/gen"
 	models "piglet-bills-service/internal/domain/model"
 )

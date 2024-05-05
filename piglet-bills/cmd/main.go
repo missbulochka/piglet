@@ -4,9 +4,10 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"syscall"
+
 	"piglet-bills-service/internal/app"
 	"piglet-bills-service/internal/config"
-	"syscall"
 )
 
 const (
