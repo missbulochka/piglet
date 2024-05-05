@@ -82,9 +82,9 @@ func (s *serverAPI) CreateBill(
 			BillType:       bill.BillType,
 			BillStatus:     bill.BillStatus,
 			BillName:       bill.Name,
-			CurrentSum:     "0",
+			CurrentSum:     bill.CurrentSum.String(),
 			Date:           bill.Date,
-			MonthlyPayment: "0",
+			MonthlyPayment: bill.MonthlyPayment.String(),
 		},
 	}, nil
 }

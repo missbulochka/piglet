@@ -4,9 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
+	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 
 	models "piglet-bills-service/internal/domain/model"
+	"piglet-bills-service/internal/storage"
 )
 
 type Storage struct {
@@ -44,7 +47,33 @@ func (s *Storage) SaveBill(ctx context.Context,
 ) (bill models.Bill, err error) {
 	const op = "piglet-bills | storage.psql.SaveBill"
 
-	// TODO: работа с базой данных
+	id := uuid.New().String()
+	row := s.db.QueryRowContext(ctx, storage.CreateBill, id, billName, currentSum)
+	err = row.Scan(
+		&bill.ID,
+		&bill.Name,
+		&bill.CurrentSum,
+	)
+	if err != nil {
+		return bill, fmt.Errorf("%s: %w", op, err)
+	}
 
-	return models.Bill{}, nil
+	if billType == true {
+		row := s.db.QueryRowContext(ctx, storage.CreateAccount, bill.ID, true)
+		err = row.Scan(
+			&bill.BillStatus,
+		)
+	} else {
+		row := s.db.QueryRowContext(ctx, storage.CreateGoals, bill.ID, date, monthlyPayment)
+		err = row.Scan(
+			&bill.ID,
+			&bill.Date,
+			&bill.MonthlyPayment,
+		)
+	}
+	if err != nil {
+		return bill, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return bill, err
 }
