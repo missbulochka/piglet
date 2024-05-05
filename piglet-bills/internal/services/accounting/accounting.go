@@ -1,4 +1,4 @@
-package accountingrpc
+package accounting
 
 import (
 	"context"
@@ -48,7 +48,7 @@ func (a *Accounting) CreateBill(
 	billType bool,
 	billName string,
 	date string,
-) (models.Bill, error) {
+) (bill models.Bill, err error) {
 	const op = "pigletBills | accounting.saveBill"
 
 	log := a.log.With(
@@ -69,7 +69,7 @@ func (a *Accounting) CreateBill(
 		monthlyPayment = 0
 	}
 
-	bill, err := a.billSaver.SaveBill(ctx, billType, billName, date, monthlyPayment)
+	bill, err = a.billSaver.SaveBill(ctx, billType, billName, date, monthlyPayment)
 	if err != nil {
 		if errors.Is(err, storage.ErrBillExists) {
 			log.Warn("bill already exists", err)
