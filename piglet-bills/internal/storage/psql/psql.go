@@ -66,7 +66,7 @@ func (s *Storage) SaveBill(
 		return bill, fmt.Errorf("%s: %w", op, err)
 	}
 
-	if billType == true {
+	if billType {
 		row = s.db.QueryRowContext(ctx, storage.CreateAccount, bill.ID, openAccount)
 		err = row.Scan(
 			&bill.BillStatus,
@@ -81,6 +81,46 @@ func (s *Storage) SaveBill(
 	}
 	if err != nil {
 		// TODO: удалить запись в bills,если не удалось создать запись
+		return bill, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return bill, err
+}
+
+func (s *Storage) BillReturner(
+	ctx context.Context,
+	billId string,
+	billName string,
+) (bill models.Bill, err error) {
+	const op = "piglet-bills | storage.psql.BillReturner"
+
+	bill = models.Bill{}
+
+	// HACK: обработка ошибки парсинга uuid
+	row := s.db.QueryRowContext(ctx, storage.GetOneBill, billId, billName)
+	err = row.Scan(
+		&bill.ID,
+		&bill.Name,
+		&bill.CurrentSum,
+		&bill.BillType,
+	)
+	if err != nil {
+		return bill, fmt.Errorf("%s: %w", op, err)
+	}
+
+	if bill.BillType {
+		row = s.db.QueryRowContext(ctx, storage.GetOneAccount, bill.ID)
+		err = row.Scan(&bill.BillStatus)
+	} else {
+		row = s.db.QueryRowContext(ctx, storage.GetOneGoal, bill.ID)
+		err = row.Scan(
+			&bill.GoalSum,
+			&bill.Date,
+			&bill.MonthlyPayment,
+		)
+	}
+
+	if err != nil {
 		return bill, fmt.Errorf("%s: %w", op, err)
 	}
 

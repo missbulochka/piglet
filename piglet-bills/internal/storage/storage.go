@@ -39,3 +39,27 @@ const (
 		) RETURNING goal_sum, date, monthly_payment
 		`
 )
+
+const (
+	// HACK: подумать над аккуратностью запроса
+	GetOneBill = `
+		SELECT id, bill_name, current_sum, bill_type
+		FROM bills 
+		WHERE ($1 = '' OR id::text = $1) OR ($2 = '' OR bill_name = $2)
+		LIMIT 1;
+	`
+
+	GetOneAccount = `
+		SELECT bill_status
+		FROM accounts
+		WHERE bill_id::text = $1
+		LIMIT 1 
+	`
+
+	GetOneGoal = `
+		SELECT goal_sum, date, monthly_payment
+		FROM goals
+		WHERE bill_id::text = $1
+		LIMIT 1
+	`
+)
