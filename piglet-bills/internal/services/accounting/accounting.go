@@ -16,8 +16,9 @@ import (
 )
 
 type Accounting struct {
-	log       *slog.Logger
-	billSaver BillSaver
+	log          *slog.Logger
+	billSaver    BillSaver
+	billProvider BillProvider
 }
 
 type BillSaver interface {
@@ -31,10 +32,16 @@ type BillSaver interface {
 	) (bill models.Bill, err error)
 }
 
-// TODO: дописать интерфейс BillProvider
+type BillProvider interface {
+	BillReturner(
+		ctx context.Context,
+		search string,
+	) (bill models.Bill, err error)
+}
 
 var (
-	ErrUserExists = errors.New("user already exists")
+	ErrBillExists   = errors.New("bill already exists")
+	ErrBillNotFound = errors.New("bill not found")
 )
 
 // New returns a new intarface of the Accounting service
@@ -89,7 +96,7 @@ func (a *Accounting) CreateBill(
 		if errors.Is(err, storage.ErrBillExists) {
 			log.Warn("bill already exists", err)
 
-			return models.Bill{}, fmt.Errorf("%s: %w", op, ErrUserExists)
+			return models.Bill{}, fmt.Errorf("%s: %w", op, ErrBillExists)
 		}
 
 		log.Error("failed to save bill", err)
@@ -99,6 +106,43 @@ func (a *Accounting) CreateBill(
 
 	log.Info("saved bill")
 	return bill, nil
+}
+
+// GetBill retrieves a bill from the system by its name or uuid and returns it.
+// If a bill with the given uuid or name does not exist, returns an error.
+func (a *Accounting) GetBill(
+	ctx context.Context,
+	search string,
+) (bill models.Bill, err error) {
+	const op = "pigletBills | accounting.getBill"
+
+	log := a.log.With(
+		slog.String("op", op),
+		// These may be things that are not profitable for business to log
+		slog.String("credits", search),
+	)
+
+	log.Info("searching bill")
+
+	bill, err = a.billProvider.BillReturner(
+		ctx,
+		search,
+	)
+	if err != nil {
+		if errors.Is(err, storage.ErrBillNotFound) {
+			log.Warn("bill not found", err)
+
+			return models.Bill{}, fmt.Errorf("%s: %w", op, ErrBillExists)
+		}
+
+		log.Error("failed to search bill", err)
+
+		return models.Bill{}, fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("searched bill")
+	return bill, nil
+
 }
 
 func countPayment(futureDate time.Time, sum decimal.Decimal) (monthlyPayment decimal.Decimal, err error) {
