@@ -38,6 +38,7 @@ type BillProvider interface {
 		billId string,
 		billName string,
 	) (bill models.Bill, err error)
+	SomeBillsReturner(ctx context.Context, billType bool) (bills []*models.Bill, err error)
 }
 
 var (
@@ -111,6 +112,25 @@ func (a *Accounting) CreateBill(
 	return bill, nil
 }
 
+// GetSomeBills retrieves bills from the system by their types and returns them.
+// If an error occurs, it returns an error.
+func (a *Accounting) GetSomeBills(ctx context.Context, billType bool) (bills []*models.Bill, err error) {
+	const op = "pigletBills | accounting.getSomeBills"
+	log := a.log.With(slog.String("op", op))
+
+	log.Info("searching bills")
+
+	bills, err = a.billProvider.SomeBillsReturner(ctx, billType)
+	if err != nil {
+		log.Error("failed to search bill", err)
+
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("searched bill")
+	return bills, nil
+}
+
 // GetBill retrieves a bill from the system by its name or uuid and returns it.
 // If a bill with the given uuid or name does not exist, returns an error.
 func (a *Accounting) GetBill(
@@ -144,7 +164,6 @@ func (a *Accounting) GetBill(
 
 	log.Info("searched bill")
 	return bill, nil
-
 }
 
 func countPayment(futureDate time.Time, sum decimal.Decimal) (monthlyPayment decimal.Decimal, err error) {
