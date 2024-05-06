@@ -33,7 +33,10 @@ type Accounting interface {
 		date time.Time,
 	) (bill models.Bill, err error)
 	//GetSomeBills(ctx context.Context) (bills []models.Bill, err error)
-	//GetBill(ctx context.Context, ID string) (bill models.Bill, err error)
+	GetBill(
+		ctx context.Context,
+		finder string,
+	) (bill models.Bill, err error)
 	//UpdateBill(ctx context.Context,
 	//	billStatus bool,
 	//	billName string,
@@ -73,14 +76,14 @@ func (s *serverAPI) CreateBill(
 		req.GetDate().AsTime(),
 	)
 	if err != nil {
-		if errors.Is(err, accounting.ErrUserExists) {
-			return nil, status.Error(codes.InvalidArgument, "invalid email or password")
+		if errors.Is(err, accounting.ErrBillExists) {
+			return nil, status.Error(codes.InvalidArgument, "invalid credits")
 		}
 
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
 
-	// HACK: обработка ошибок
+	// HACK: поработать над преобразованиями и обработкой ошибок
 	currentSum, _ := bill.CurrentSum.Float64()
 	newGoalSum, _ := bill.GoalSum.Float64()
 	monthlyPayment := uint32(int32(bill.MonthlyPayment.IntPart()))
@@ -115,19 +118,34 @@ func (s *serverAPI) GetBill(
 	ctx context.Context,
 	req *billsv1.GetBillRequest,
 ) (*billsv1.BillResponse, error) {
-	// TODO: setup validation
+	// HACK: улучшить валидацию
+	finder, err := orValidation(req.GetId(), req.GetBillName())
+	if err != nil {
+		return nil, err
+	}
 
-	// TODO: setup logic
+	bill, err := s.accounting.GetBill(ctx, finder)
+	if err != nil {
+		if errors.Is(err, accounting.ErrBillNotFound) {
+			return nil, status.Error(codes.InvalidArgument, "invalid uuid or bill name")
+		}
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
 
+	// HACK: поработать над преобразованиями и обработкой ошибок
+	currentSum, _ := bill.CurrentSum.Float64()
+	newGoalSum, _ := bill.GoalSum.Float64()
+	monthlyPayment := uint32(int32(bill.MonthlyPayment.IntPart()))
 	return &billsv1.BillResponse{
 		Bill: &billsv1.Bill{
-			Id:             "",
-			BillType:       false,
-			BillStatus:     false,
-			BillName:       "",
-			CurrentSum:     0,
-			Date:           nil,
-			MonthlyPayment: 0,
+			Id:             bill.ID,
+			BillType:       bill.BillType,
+			BillStatus:     bill.BillStatus,
+			BillName:       bill.Name,
+			CurrentSum:     float32(currentSum),
+			GoalSum:        float32(newGoalSum),
+			Date:           timestamppb.New(bill.Date),
+			MonthlyPayment: monthlyPayment,
 		},
 	}, nil
 }
@@ -185,6 +203,19 @@ func validation(
 		return status.Errorf(codes.Internal, "internal error: %v", err)
 	}
 	return nil
+}
+
+func orValidation(uuid string, name string) (string, error) {
+	val := validator.New(validator.WithRequiredStructEnabled())
+
+	if err := val.Var(uuid, "required"); err != nil {
+		if err2 := val.Var(name, "required"); err2 != nil {
+			return "", status.Errorf(codes.InvalidArgument, err2.Error())
+		}
+		return name, nil
+	}
+
+	return uuid, nil
 }
 
 type validateData struct {

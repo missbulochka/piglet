@@ -48,6 +48,7 @@ message getSomeBillsResponse {
 
 message getBillRequest {
     string id = 1;
+    string billName = 2;
 }
 
 message updateBillRequest {
