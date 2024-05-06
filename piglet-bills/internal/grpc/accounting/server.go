@@ -35,7 +35,8 @@ type Accounting interface {
 	//GetSomeBills(ctx context.Context) (bills []models.Bill, err error)
 	GetBill(
 		ctx context.Context,
-		search string,
+		billId string,
+		billName string,
 	) (bill models.Bill, err error)
 	//UpdateBill(ctx context.Context,
 	//	billStatus bool,
@@ -119,12 +120,11 @@ func (s *serverAPI) GetBill(
 	req *billsv1.GetBillRequest,
 ) (*billsv1.BillResponse, error) {
 	// HACK: улучшить валидацию
-	search, err := orValidation(req.GetId(), req.GetBillName())
-	if err != nil {
+	if err := orValidation(req.GetId(), req.GetBillName()); err != nil {
 		return nil, err
 	}
 
-	bill, err := s.accounting.GetBill(ctx, search)
+	bill, err := s.accounting.GetBill(ctx, req.GetId(), req.GetBillName())
 	if err != nil {
 		if errors.Is(err, accounting.ErrBillNotFound) {
 			return nil, status.Error(codes.InvalidArgument, "invalid uuid or bill name")
@@ -205,17 +205,16 @@ func validation(
 	return nil
 }
 
-func orValidation(uuid string, name string) (string, error) {
-	val := validator.New(validator.WithRequiredStructEnabled())
+func orValidation(uuid string, name string) error {
+	val := validator.New()
 
 	if err := val.Var(uuid, "required"); err != nil {
 		if err2 := val.Var(name, "required"); err2 != nil {
-			return "", status.Errorf(codes.InvalidArgument, err2.Error())
+			return status.Errorf(codes.InvalidArgument, err2.Error())
 		}
-		return name, nil
 	}
 
-	return uuid, nil
+	return nil
 }
 
 type validateData struct {
