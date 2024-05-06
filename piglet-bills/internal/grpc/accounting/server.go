@@ -35,7 +35,7 @@ type Accounting interface {
 	//GetSomeBills(ctx context.Context) (bills []models.Bill, err error)
 	GetBill(
 		ctx context.Context,
-		finder string,
+		search string,
 	) (bill models.Bill, err error)
 	//UpdateBill(ctx context.Context,
 	//	billStatus bool,
@@ -119,12 +119,12 @@ func (s *serverAPI) GetBill(
 	req *billsv1.GetBillRequest,
 ) (*billsv1.BillResponse, error) {
 	// HACK: улучшить валидацию
-	finder, err := orValidation(req.GetId(), req.GetBillName())
+	search, err := orValidation(req.GetId(), req.GetBillName())
 	if err != nil {
 		return nil, err
 	}
 
-	bill, err := s.accounting.GetBill(ctx, finder)
+	bill, err := s.accounting.GetBill(ctx, search)
 	if err != nil {
 		if errors.Is(err, accounting.ErrBillNotFound) {
 			return nil, status.Error(codes.InvalidArgument, "invalid uuid or bill name")
