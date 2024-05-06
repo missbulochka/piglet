@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -28,7 +29,7 @@ type Accounting interface {
 		ctx context.Context,
 		billType bool,
 		billName string,
-		currentSum decimal.Decimal,
+		goalSum decimal.Decimal,
 		date time.Time,
 	) (bill models.Bill, err error)
 	//GetSomeBills(ctx context.Context) (bills []models.Bill, err error)
@@ -51,6 +52,7 @@ func (s *serverAPI) CreateBill(
 	req *billsv1.CreateBillRequest,
 ) (*billsv1.BillResponse, error) {
 	// HACK: улучшить валидацию (не передавать структуру в целом)
+	// HACK: проверка даты для цели на корректность (не в прошлом и реальная в будущем)
 	if err := validation(
 		validateData{
 			billType: req.GetBillType(),
@@ -60,13 +62,14 @@ func (s *serverAPI) CreateBill(
 		return nil, err
 	}
 
-	currentSum := decimal.NewFromInt32(req.GetCurrentSum())
+	// HACK: обработка ошибок
+	goalSum, _ := decimal.NewFromString(strconv.FormatUint(uint64(req.GetGoalSum()), 10))
 
 	bill, err := s.accounting.CreateBill(
 		ctx,
 		req.GetBillType(),
 		req.GetBillName(),
-		currentSum,
+		goalSum,
 		req.GetDate().AsTime(),
 	)
 	if err != nil {
@@ -77,15 +80,21 @@ func (s *serverAPI) CreateBill(
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
 
+	// HACK: обработка ошибок
+	currentSum, _ := bill.CurrentSum.Float64()
+	newGoalSum, _ := bill.GoalSum.Float64()
+	monthlyPayment := uint32(int32(bill.MonthlyPayment.IntPart()))
+
 	return &billsv1.BillResponse{
 		Bill: &billsv1.Bill{
 			Id:             bill.ID,
 			BillType:       bill.BillType,
 			BillStatus:     bill.BillStatus,
 			BillName:       bill.Name,
-			CurrentSum:     int32(bill.CurrentSum.IntPart()),
+			CurrentSum:     float32(currentSum),
+			GoalSum:        float32(newGoalSum),
 			Date:           timestamppb.New(bill.Date),
-			MonthlyPayment: uint32(bill.MonthlyPayment.IntPart()),
+			MonthlyPayment: monthlyPayment,
 		},
 	}, nil
 }

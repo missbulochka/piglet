@@ -17,6 +17,11 @@ type Storage struct {
 	db *sql.DB
 }
 
+const (
+	emptySumValue = 0
+	openAccount   = true
+)
+
 func New(
 	dbHost string,
 	dbPort string,
@@ -43,14 +48,14 @@ func (s *Storage) SaveBill(
 	ctx context.Context,
 	billType bool,
 	billName string,
-	currentSum decimal.Decimal,
+	goalSum decimal.Decimal,
 	date time.Time,
 	monthlyPayment decimal.Decimal,
 ) (bill models.Bill, err error) {
 	const op = "piglet-bills | storage.psql.SaveBill"
 
 	id := uuid.New().String()
-	row := s.db.QueryRowContext(ctx, storage.CreateBill, id, billName, currentSum, billType)
+	row := s.db.QueryRowContext(ctx, storage.CreateBill, id, billName, emptySumValue, billType)
 	err = row.Scan(
 		&bill.ID,
 		&bill.Name,
@@ -62,13 +67,14 @@ func (s *Storage) SaveBill(
 	}
 
 	if billType == true {
-		row = s.db.QueryRowContext(ctx, storage.CreateAccount, bill.ID, true)
+		row = s.db.QueryRowContext(ctx, storage.CreateAccount, bill.ID, openAccount)
 		err = row.Scan(
 			&bill.BillStatus,
 		)
 	} else {
-		row = s.db.QueryRowContext(ctx, storage.CreateGoals, bill.ID, date, monthlyPayment)
+		row = s.db.QueryRowContext(ctx, storage.CreateGoals, bill.ID, goalSum, date, monthlyPayment)
 		err = row.Scan(
+			&bill.GoalSum,
 			&bill.Date,
 			&bill.MonthlyPayment,
 		)

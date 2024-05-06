@@ -11,30 +11,31 @@ const (
 	CreateBill = `
 		INSERT INTO bills (
 		    id,
-			"billName",
-			"currentSum",
-		    "billType"
+			bill_name,
+			current_sum,
+		    bill_type
 		) VALUES (
 			$1, $2, $3, $4
-		) RETURNING id, "billName", "currentSum", "billType"
+		) RETURNING id, bill_name, current_sum, bill_type
 	`
 
 	CreateAccount = `
 		INSERT INTO accounts (
 		    bill_id, 
-		    "billStatus"
+		    bill_status
 		) VALUES (
 		    $1, $2
-		) RETURNING "billStatus"
+		) RETURNING bill_status
 	`
 
 	CreateGoals = `
 		INSERT INTO goals (
 		    bill_id, 
+		    goal_sum,
 		    date,
-		    "monthlyPayment"
+		    monthly_payment
 		) VALUES (
-		    $1, $2, $3
-		) RETURNING date, "monthlyPayment"
+		    $1, $2, $3, $4
+		) RETURNING goal_sum, date, monthly_payment
 		`
 )

@@ -25,7 +25,7 @@ type BillSaver interface {
 		ctx context.Context,
 		billType bool,
 		billName string,
-		currentSum decimal.Decimal,
+		goalSum decimal.Decimal,
 		date time.Time,
 		monthlyPayment decimal.Decimal,
 	) (bill models.Bill, err error)
@@ -54,7 +54,7 @@ func (a *Accounting) CreateBill(
 	ctx context.Context,
 	billType bool,
 	billName string,
-	currentSum decimal.Decimal,
+	goalSum decimal.Decimal,
 	date time.Time,
 ) (bill models.Bill, err error) {
 	const op = "pigletBills | accounting.saveBill"
@@ -68,7 +68,7 @@ func (a *Accounting) CreateBill(
 
 	monthlyPayment := decimal.New(0, 0)
 	if billType == false {
-		if monthlyPayment, err = countPayment(date, currentSum); err != nil {
+		if monthlyPayment, err = countPayment(date, goalSum); err != nil {
 			log.Warn("something wrong with date", err)
 
 			return models.Bill{}, fmt.Errorf("%s: %w", op, err)
@@ -81,7 +81,7 @@ func (a *Accounting) CreateBill(
 		ctx,
 		billType,
 		billName,
-		currentSum,
+		goalSum,
 		date,
 		monthlyPayment,
 	)

@@ -4,7 +4,7 @@ import "google/protobuf/timestamp.proto";
 
 package accounting;
 
-option go_package = "piglet-bills/api/proto/gen;billsv1";
+option go_package = "api/proto/gen;billsv1";
 
 service pigletBills {
   rpc createBill (createBillRequest) returns (BillResponse);
@@ -19,17 +19,18 @@ message Bill {
     bool billType = 2;
     bool billStatus = 3;
     string billName = 4;
-    sfixed32 currentSum = 5;
+    float currentSum = 5;
     reserved 6;
-    google.protobuf.Timestamp date = 7;
-    fixed32 monthlyPayment = 8;
+    float goalSum = 7;
+    google.protobuf.Timestamp date = 8;
+    fixed32 monthlyPayment = 9;
 }
 
 message createBillRequest {
     bool billType = 1;
     string billName = 2;
     reserved 3;
-    sfixed32 currentSum = 4;
+    float goalSum = 4;
     google.protobuf.Timestamp date = 5;
 }
 

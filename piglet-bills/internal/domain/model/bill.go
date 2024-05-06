@@ -11,6 +11,7 @@ type Bill struct {
 	BillStatus     bool
 	Name           string
 	CurrentSum     decimal.Decimal
+	GoalSum        decimal.Decimal
 	Date           time.Time
 	MonthlyPayment decimal.Decimal
 }
