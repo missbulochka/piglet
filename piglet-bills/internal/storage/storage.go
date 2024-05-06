@@ -12,10 +12,11 @@ const (
 		INSERT INTO bills (
 		    id,
 			"billName",
-			"currentSum"
+			"currentSum",
+		    "billType"
 		) VALUES (
-			$1, $2, $3
-		) RETURNING id, "billName", "currentSum"
+			$1, $2, $3, $4
+		) RETURNING id, "billName", "currentSum", "billType"
 	`
 
 	CreateAccount = `

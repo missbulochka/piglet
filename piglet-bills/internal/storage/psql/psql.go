@@ -50,11 +50,12 @@ func (s *Storage) SaveBill(
 	const op = "piglet-bills | storage.psql.SaveBill"
 
 	id := uuid.New().String()
-	row := s.db.QueryRowContext(ctx, storage.CreateBill, id, billName, currentSum)
+	row := s.db.QueryRowContext(ctx, storage.CreateBill, id, billName, currentSum, billType)
 	err = row.Scan(
 		&bill.ID,
 		&bill.Name,
 		&bill.CurrentSum,
+		&bill.BillType,
 	)
 	if err != nil {
 		return bill, fmt.Errorf("%s: %w", op, err)
@@ -73,6 +74,7 @@ func (s *Storage) SaveBill(
 		)
 	}
 	if err != nil {
+		// TODO: удалить запись в bills,если не удалось создать запись
 		return bill, fmt.Errorf("%s: %w", op, err)
 	}
 
