@@ -32,7 +32,7 @@ type Accounting interface {
 		goalSum decimal.Decimal,
 		date time.Time,
 	) (bill models.Bill, err error)
-	//GetSomeBills(ctx context.Context) (bills []models.Bill, err error)
+	GetSomeBills(ctx context.Context, billType bool) (bills []*models.Bill, err error)
 	GetBill(
 		ctx context.Context,
 		billId string,
@@ -51,6 +51,12 @@ func Register(gRPCServer *grpc.Server, accounting Accounting) {
 	billsv1.RegisterPigletBillsServer(gRPCServer, &serverAPI{accounting: accounting})
 }
 
+const (
+	accountType = true
+	goalType    = false
+)
+
+// HACK: стоит разбить на CreateAccount и CreateGoal
 func (s *serverAPI) CreateBill(
 	ctx context.Context,
 	req *billsv1.CreateBillRequest,
@@ -103,15 +109,38 @@ func (s *serverAPI) CreateBill(
 	}, nil
 }
 
-// TODO: возврат нескольких счетов, getSomeBills получает массив с id (?)
-func (s *serverAPI) GetSomeBills(
+// HACK: возврат нескольких счетов, getSomeBills получает массив с id (?)
+func (s *serverAPI) GetAllAccounts(
 	ctx context.Context,
 	req *billsv1.GetSomeBillsRequest,
 ) (*billsv1.GetSomeBillsResponse, error) {
-	var bills []*billsv1.Bill
+	bills, err := s.accounting.GetSomeBills(ctx, accountType)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "something go wrong")
+	}
+
+	// HACK: аккуратный возврат всех счетов
+	resBills := billsConversion(bills)
 
 	return &billsv1.GetSomeBillsResponse{
-		Bills: bills,
+		Bills: resBills,
+	}, nil
+}
+
+func (s *serverAPI) GetAllGoals(
+	ctx context.Context,
+	req *billsv1.GetSomeBillsRequest,
+) (*billsv1.GetSomeBillsResponse, error) {
+	bills, err := s.accounting.GetSomeBills(ctx, goalType)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "something go wrong")
+	}
+
+	// HACK: аккуратный возврат всех счетов
+	resBills := billsConversion(bills)
+
+	return &billsv1.GetSomeBillsResponse{
+		Bills: resBills,
 	}, nil
 }
 
@@ -220,4 +249,27 @@ func orValidation(uuid string, name string) error {
 type validateData struct {
 	billType bool   `validate:"boolean"`
 	billName string `validate:"required"`
+}
+
+func billsConversion(bills []*models.Bill) []*billsv1.Bill {
+	var resBills []*billsv1.Bill
+	for _, bill := range bills {
+		currentSum, _ := bill.CurrentSum.Float64()
+		goalSum, _ := bill.GoalSum.Float64()
+		monthlyPayment := uint32(int32(bill.MonthlyPayment.IntPart()))
+
+		resBill := &billsv1.Bill{
+			Id:             bill.ID,
+			BillType:       bill.BillType,
+			BillStatus:     bill.BillStatus,
+			BillName:       bill.Name,
+			CurrentSum:     float32(currentSum),
+			GoalSum:        float32(goalSum),
+			Date:           timestamppb.New(bill.Date),
+			MonthlyPayment: monthlyPayment,
+		}
+		resBills = append(resBills, resBill)
+	}
+
+	return resBills
 }
