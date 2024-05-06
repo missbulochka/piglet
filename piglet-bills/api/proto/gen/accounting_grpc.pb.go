@@ -23,7 +23,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PigletBillsClient interface {
 	CreateBill(ctx context.Context, in *CreateBillRequest, opts ...grpc.CallOption) (*BillResponse, error)
-	GetSomeBills(ctx context.Context, in *GetSomeBillsRequest, opts ...grpc.CallOption) (*GetSomeBillsResponse, error)
+	GetAllAccounts(ctx context.Context, in *GetSomeBillsRequest, opts ...grpc.CallOption) (*GetSomeBillsResponse, error)
+	GetAllGoals(ctx context.Context, in *GetSomeBillsRequest, opts ...grpc.CallOption) (*GetSomeBillsResponse, error)
 	GetBill(ctx context.Context, in *GetBillRequest, opts ...grpc.CallOption) (*BillResponse, error)
 	UpdateBill(ctx context.Context, in *UpdateBillRequest, opts ...grpc.CallOption) (*BillResponse, error)
 	DeleteBill(ctx context.Context, in *DeleteBillRequest, opts ...grpc.CallOption) (*DeleteBillResponse, error)
@@ -39,16 +40,25 @@ func NewPigletBillsClient(cc grpc.ClientConnInterface) PigletBillsClient {
 
 func (c *pigletBillsClient) CreateBill(ctx context.Context, in *CreateBillRequest, opts ...grpc.CallOption) (*BillResponse, error) {
 	out := new(BillResponse)
-	err := c.cc.Invoke(ctx, "/accounting.pigletBills/createBill", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/accounting.pigletBills/CreateBill", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *pigletBillsClient) GetSomeBills(ctx context.Context, in *GetSomeBillsRequest, opts ...grpc.CallOption) (*GetSomeBillsResponse, error) {
+func (c *pigletBillsClient) GetAllAccounts(ctx context.Context, in *GetSomeBillsRequest, opts ...grpc.CallOption) (*GetSomeBillsResponse, error) {
 	out := new(GetSomeBillsResponse)
-	err := c.cc.Invoke(ctx, "/accounting.pigletBills/getSomeBills", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/accounting.pigletBills/GetAllAccounts", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *pigletBillsClient) GetAllGoals(ctx context.Context, in *GetSomeBillsRequest, opts ...grpc.CallOption) (*GetSomeBillsResponse, error) {
+	out := new(GetSomeBillsResponse)
+	err := c.cc.Invoke(ctx, "/accounting.pigletBills/GetAllGoals", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +67,7 @@ func (c *pigletBillsClient) GetSomeBills(ctx context.Context, in *GetSomeBillsRe
 
 func (c *pigletBillsClient) GetBill(ctx context.Context, in *GetBillRequest, opts ...grpc.CallOption) (*BillResponse, error) {
 	out := new(BillResponse)
-	err := c.cc.Invoke(ctx, "/accounting.pigletBills/getBill", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/accounting.pigletBills/GetBill", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +76,7 @@ func (c *pigletBillsClient) GetBill(ctx context.Context, in *GetBillRequest, opt
 
 func (c *pigletBillsClient) UpdateBill(ctx context.Context, in *UpdateBillRequest, opts ...grpc.CallOption) (*BillResponse, error) {
 	out := new(BillResponse)
-	err := c.cc.Invoke(ctx, "/accounting.pigletBills/updateBill", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/accounting.pigletBills/UpdateBill", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +85,7 @@ func (c *pigletBillsClient) UpdateBill(ctx context.Context, in *UpdateBillReques
 
 func (c *pigletBillsClient) DeleteBill(ctx context.Context, in *DeleteBillRequest, opts ...grpc.CallOption) (*DeleteBillResponse, error) {
 	out := new(DeleteBillResponse)
-	err := c.cc.Invoke(ctx, "/accounting.pigletBills/deleteBill", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/accounting.pigletBills/DeleteBill", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +97,8 @@ func (c *pigletBillsClient) DeleteBill(ctx context.Context, in *DeleteBillReques
 // for forward compatibility
 type PigletBillsServer interface {
 	CreateBill(context.Context, *CreateBillRequest) (*BillResponse, error)
-	GetSomeBills(context.Context, *GetSomeBillsRequest) (*GetSomeBillsResponse, error)
+	GetAllAccounts(context.Context, *GetSomeBillsRequest) (*GetSomeBillsResponse, error)
+	GetAllGoals(context.Context, *GetSomeBillsRequest) (*GetSomeBillsResponse, error)
 	GetBill(context.Context, *GetBillRequest) (*BillResponse, error)
 	UpdateBill(context.Context, *UpdateBillRequest) (*BillResponse, error)
 	DeleteBill(context.Context, *DeleteBillRequest) (*DeleteBillResponse, error)
@@ -101,8 +112,11 @@ type UnimplementedPigletBillsServer struct {
 func (UnimplementedPigletBillsServer) CreateBill(context.Context, *CreateBillRequest) (*BillResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateBill not implemented")
 }
-func (UnimplementedPigletBillsServer) GetSomeBills(context.Context, *GetSomeBillsRequest) (*GetSomeBillsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetSomeBills not implemented")
+func (UnimplementedPigletBillsServer) GetAllAccounts(context.Context, *GetSomeBillsRequest) (*GetSomeBillsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllAccounts not implemented")
+}
+func (UnimplementedPigletBillsServer) GetAllGoals(context.Context, *GetSomeBillsRequest) (*GetSomeBillsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllGoals not implemented")
 }
 func (UnimplementedPigletBillsServer) GetBill(context.Context, *GetBillRequest) (*BillResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBill not implemented")
@@ -136,7 +150,7 @@ func _PigletBills_CreateBill_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/accounting.pigletBills/createBill",
+		FullMethod: "/accounting.pigletBills/CreateBill",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PigletBillsServer).CreateBill(ctx, req.(*CreateBillRequest))
@@ -144,20 +158,38 @@ func _PigletBills_CreateBill_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PigletBills_GetSomeBills_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _PigletBills_GetAllAccounts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetSomeBillsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PigletBillsServer).GetSomeBills(ctx, in)
+		return srv.(PigletBillsServer).GetAllAccounts(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/accounting.pigletBills/getSomeBills",
+		FullMethod: "/accounting.pigletBills/GetAllAccounts",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PigletBillsServer).GetSomeBills(ctx, req.(*GetSomeBillsRequest))
+		return srv.(PigletBillsServer).GetAllAccounts(ctx, req.(*GetSomeBillsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PigletBills_GetAllGoals_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSomeBillsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PigletBillsServer).GetAllGoals(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/accounting.pigletBills/GetAllGoals",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PigletBillsServer).GetAllGoals(ctx, req.(*GetSomeBillsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -172,7 +204,7 @@ func _PigletBills_GetBill_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/accounting.pigletBills/getBill",
+		FullMethod: "/accounting.pigletBills/GetBill",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PigletBillsServer).GetBill(ctx, req.(*GetBillRequest))
@@ -190,7 +222,7 @@ func _PigletBills_UpdateBill_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/accounting.pigletBills/updateBill",
+		FullMethod: "/accounting.pigletBills/UpdateBill",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PigletBillsServer).UpdateBill(ctx, req.(*UpdateBillRequest))
@@ -208,7 +240,7 @@ func _PigletBills_DeleteBill_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/accounting.pigletBills/deleteBill",
+		FullMethod: "/accounting.pigletBills/DeleteBill",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PigletBillsServer).DeleteBill(ctx, req.(*DeleteBillRequest))
@@ -224,23 +256,27 @@ var PigletBills_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*PigletBillsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "createBill",
+			MethodName: "CreateBill",
 			Handler:    _PigletBills_CreateBill_Handler,
 		},
 		{
-			MethodName: "getSomeBills",
-			Handler:    _PigletBills_GetSomeBills_Handler,
+			MethodName: "GetAllAccounts",
+			Handler:    _PigletBills_GetAllAccounts_Handler,
 		},
 		{
-			MethodName: "getBill",
+			MethodName: "GetAllGoals",
+			Handler:    _PigletBills_GetAllGoals_Handler,
+		},
+		{
+			MethodName: "GetBill",
 			Handler:    _PigletBills_GetBill_Handler,
 		},
 		{
-			MethodName: "updateBill",
+			MethodName: "UpdateBill",
 			Handler:    _PigletBills_UpdateBill_Handler,
 		},
 		{
-			MethodName: "deleteBill",
+			MethodName: "DeleteBill",
 			Handler:    _PigletBills_DeleteBill_Handler,
 		},
 	},

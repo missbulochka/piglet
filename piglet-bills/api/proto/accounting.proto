@@ -7,11 +7,12 @@ package accounting;
 option go_package = "api/proto/gen;billsv1";
 
 service pigletBills {
-  rpc createBill (createBillRequest) returns (BillResponse);
-  rpc getSomeBills (getSomeBillsRequest) returns (getSomeBillsResponse);
-  rpc getBill (getBillRequest) returns (BillResponse);
-  rpc updateBill (updateBillRequest) returns (BillResponse);
-  rpc deleteBill (deleteBillRequest) returns (deleteBillResponse);
+  rpc CreateBill (CreateBillRequest) returns (BillResponse);
+  rpc GetAllAccounts (GetSomeBillsRequest) returns (GetSomeBillsResponse);
+  rpc GetAllGoals (GetSomeBillsRequest) returns (GetSomeBillsResponse);
+  rpc GetBill (GetBillRequest) returns (BillResponse);
+  rpc UpdateBill (UpdateBillRequest) returns (BillResponse);
+  rpc DeleteBill (DeleteBillRequest) returns (DeleteBillResponse);
 }
 
 message Bill {
@@ -26,7 +27,7 @@ message Bill {
     fixed32 monthlyPayment = 9;
 }
 
-message createBillRequest {
+message CreateBillRequest {
     bool billType = 1;
     string billName = 2;
     reserved 3;
@@ -38,20 +39,20 @@ message BillResponse {
     Bill bill = 1;
 }
 
-message getSomeBillsRequest {
+message GetSomeBillsRequest {
 
 }
 
-message getSomeBillsResponse {
+message GetSomeBillsResponse {
     repeated Bill bills = 1;
 }
 
-message getBillRequest {
+message GetBillRequest {
     string id = 1;
     string billName = 2;
 }
 
-message updateBillRequest {
+message UpdateBillRequest {
     bool billStatus = 1;
     string billName = 2;
     float currentSum = 3;
@@ -59,10 +60,10 @@ message updateBillRequest {
     string date = 5;
 }
 
-message deleteBillRequest {
+message DeleteBillRequest {
     string id = 1;
 }
 
-message deleteBillResponse {
+message DeleteBillResponse {
     bool success = 1;
 }
