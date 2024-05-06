@@ -35,7 +35,8 @@ type BillSaver interface {
 type BillProvider interface {
 	BillReturner(
 		ctx context.Context,
-		search string,
+		billId string,
+		billName string,
 	) (bill models.Bill, err error)
 }
 
@@ -48,10 +49,12 @@ var (
 func New(
 	log *slog.Logger,
 	billSaver BillSaver,
+	billProvider BillProvider,
 ) *Accounting {
 	return &Accounting{
-		billSaver: billSaver,
-		log:       log,
+		log:          log,
+		billSaver:    billSaver,
+		billProvider: billProvider,
 	}
 }
 
@@ -112,22 +115,21 @@ func (a *Accounting) CreateBill(
 // If a bill with the given uuid or name does not exist, returns an error.
 func (a *Accounting) GetBill(
 	ctx context.Context,
-	search string,
+	billId string,
+	billName string,
 ) (bill models.Bill, err error) {
 	const op = "pigletBills | accounting.getBill"
 
 	log := a.log.With(
 		slog.String("op", op),
 		// These may be things that are not profitable for business to log
-		slog.String("credits", search),
+		slog.String("billId", billId),
+		slog.String("billName", billName),
 	)
 
 	log.Info("searching bill")
 
-	bill, err = a.billProvider.BillReturner(
-		ctx,
-		search,
-	)
+	bill, err = a.billProvider.BillReturner(ctx, billId, billName)
 	if err != nil {
 		if errors.Is(err, storage.ErrBillNotFound) {
 			log.Warn("bill not found", err)
