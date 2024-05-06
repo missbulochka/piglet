@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 
@@ -44,7 +44,7 @@ func (s *Storage) SaveBill(
 	billType bool,
 	billName string,
 	currentSum decimal.Decimal,
-	date *timestamp.Timestamp,
+	date time.Time,
 	monthlyPayment decimal.Decimal,
 ) (bill models.Bill, err error) {
 	const op = "piglet-bills | storage.psql.SaveBill"
@@ -68,7 +68,6 @@ func (s *Storage) SaveBill(
 	} else {
 		row = s.db.QueryRowContext(ctx, storage.CreateGoals, bill.ID, date, monthlyPayment)
 		err = row.Scan(
-			&bill.ID,
 			&bill.Date,
 			&bill.MonthlyPayment,
 		)

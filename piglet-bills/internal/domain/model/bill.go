@@ -1,8 +1,8 @@
 package models
 
 import (
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/shopspring/decimal"
+	"time"
 )
 
 type Bill struct {
@@ -11,6 +11,6 @@ type Bill struct {
 	BillStatus     bool
 	Name           string
 	CurrentSum     decimal.Decimal
-	Date           *timestamp.Timestamp
+	Date           time.Time
 	MonthlyPayment decimal.Decimal
 }

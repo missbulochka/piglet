@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"log"
+	"time"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/shopspring/decimal"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	billsv1 "piglet-bills-service/api/proto/gen"
 	models "piglet-bills-service/internal/domain/model"
@@ -28,7 +29,7 @@ type Accounting interface {
 		billType bool,
 		billName string,
 		currentSum decimal.Decimal,
-		date *timestamp.Timestamp,
+		date time.Time,
 	) (bill models.Bill, err error)
 	//GetSomeBills(ctx context.Context) (bills []models.Bill, err error)
 	//GetBill(ctx context.Context, ID string) (bill models.Bill, err error)
@@ -66,7 +67,7 @@ func (s *serverAPI) CreateBill(
 		req.GetBillType(),
 		req.GetBillName(),
 		currentSum,
-		req.GetDate(),
+		req.GetDate().AsTime(),
 	)
 	if err != nil {
 		if errors.Is(err, accounting.ErrUserExists) {
@@ -83,7 +84,7 @@ func (s *serverAPI) CreateBill(
 			BillStatus:     bill.BillStatus,
 			BillName:       bill.Name,
 			CurrentSum:     int32(bill.CurrentSum.IntPart()),
-			Date:           bill.Date,
+			Date:           timestamppb.New(bill.Date),
 			MonthlyPayment: uint32(bill.MonthlyPayment.IntPart()),
 		},
 	}, nil

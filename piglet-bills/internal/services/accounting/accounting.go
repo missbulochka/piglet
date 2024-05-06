@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math"
 	"strconv"
 	"time"
 
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/shopspring/decimal"
 
 	models "piglet-bills-service/internal/domain/model"
@@ -26,7 +26,7 @@ type BillSaver interface {
 		billType bool,
 		billName string,
 		currentSum decimal.Decimal,
-		date *timestamp.Timestamp,
+		date time.Time,
 		monthlyPayment decimal.Decimal,
 	) (bill models.Bill, err error)
 }
@@ -55,7 +55,7 @@ func (a *Accounting) CreateBill(
 	billType bool,
 	billName string,
 	currentSum decimal.Decimal,
-	date *timestamp.Timestamp,
+	date time.Time,
 ) (bill models.Bill, err error) {
 	const op = "pigletBills | accounting.saveBill"
 
@@ -101,11 +101,9 @@ func (a *Accounting) CreateBill(
 	return bill, nil
 }
 
-func countPayment(futureDate *timestamp.Timestamp, sum decimal.Decimal) (monthlyPayment decimal.Decimal, err error) {
-	date := time.Unix(futureDate.GetSeconds(), int64(futureDate.GetNanos())).UTC()
-
+func countPayment(futureDate time.Time, sum decimal.Decimal) (monthlyPayment decimal.Decimal, err error) {
 	// HACK: подумать над функцией поиска (или найти библиотеку)
-	months := int(time.Until(date).Hours() / 24 / 30)
+	months := math.Ceil(time.Until(futureDate).Hours() / 24 / 30)
 
 	if months == 0 {
 		return sum, nil

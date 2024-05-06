@@ -3,8 +3,8 @@ package storage
 import "errors"
 
 var (
-	ErrBillExists   = errors.New("Bill already exists")
-	ErrBillNotFound = errors.New("Bill not found")
+	ErrBillExists   = errors.New("bill already exists")
+	ErrBillNotFound = errors.New("bill not found")
 )
 
 const (
