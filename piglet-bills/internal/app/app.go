@@ -45,7 +45,11 @@ func New(
 		panic(err)
 	}
 
-	accountingService := accounting.New(log, storage)
+	accountingService := accounting.New(
+		log,
+		storage,
+		storage,
+	)
 
 	grpcApp := grpcapp.New(log, accountingService, grpcServer, grpcPort)
 	return &App{
