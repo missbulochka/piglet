@@ -62,4 +62,17 @@ const (
 		WHERE bill_id::text = $1
 		LIMIT 1
 	`
+
+	GetSomeBills = `
+		SELECT id, bill_name, current_sum, bill_type
+		FROM bills
+		WHERE bill_type = $1
+		ORDER BY id
+	`
+	GetAllAccounts = `SELECT bill_status FROM accounts ORDER BY bill_id`
+	GetAllGoals    = `
+		SELECT goal_sum, date, monthly_payment
+		FROM goals
+		ORDER BY bill_id
+	`
 )

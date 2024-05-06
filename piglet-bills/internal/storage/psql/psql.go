@@ -94,8 +94,6 @@ func (s *Storage) BillReturner(
 ) (bill models.Bill, err error) {
 	const op = "piglet-bills | storage.psql.BillReturner"
 
-	bill = models.Bill{}
-
 	// HACK: обработка ошибки парсинга uuid
 	row := s.db.QueryRowContext(ctx, storage.GetOneBill, billId, billName)
 	err = row.Scan(
@@ -125,4 +123,68 @@ func (s *Storage) BillReturner(
 	}
 
 	return bill, err
+}
+
+func (s *Storage) SomeBillsReturner(ctx context.Context, billType bool) (bills []*models.Bill, err error) {
+	const op = "piglet-bills | storage.psql.SomeBillsReturner"
+
+	// HACK: подумать о более красивом решении
+	rows, err := s.db.QueryContext(ctx, storage.GetSomeBills, billType)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var typedRows *sql.Rows
+	if billType {
+		typedRows, err = s.db.QueryContext(ctx, storage.GetAllAccounts)
+	} else {
+		typedRows, err = s.db.QueryContext(ctx, storage.GetAllGoals)
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer typedRows.Close()
+
+	// HACK: оптимизировать
+	for rows.Next() {
+		typedRows.Next()
+		var b models.Bill
+		if err = rows.Scan(
+			&b.ID,
+			&b.Name,
+			&b.CurrentSum,
+			&b.BillType,
+		); err != nil {
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
+		if billType {
+			if err = typedRows.Scan(&b.BillStatus); err != nil {
+				return nil, fmt.Errorf("%s: %w", op, err)
+			}
+		} else {
+			if err = typedRows.Scan(
+				&b.GoalSum,
+				&b.Date,
+				&b.MonthlyPayment,
+			); err != nil {
+				return nil, fmt.Errorf("%s: %w", op, err)
+			}
+		}
+		bills = append(bills, &b)
+	}
+
+	if err = rows.Close(); err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+	if err = typedRows.Close(); err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+	if err = typedRows.Err(); err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+	return bills, nil
 }
