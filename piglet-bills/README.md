@@ -35,6 +35,11 @@ You can run the application with the following command:
 devcontainer exec --workspace-folder . go run /workspaces/dev_piglet/cmd/main.go
 ```
 
+To stop containers use:
+```bash
+docker stop dev_piglet-bills bills_psql && docker rm dev_piglet-bills bills_psql
+```
+
 ## Database (PostgreSQL)
 
 To manage the databases for the Piglet-bill service locally, you can use the following commands
@@ -57,7 +62,7 @@ docker exec \
         Accounting
 ```
 
-### Work with database
+### Work with migrations
 
 To run migrations for the Piglet-bills service locally, use the following commands.
 
