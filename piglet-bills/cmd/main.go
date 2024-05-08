@@ -25,17 +25,7 @@ func main() {
 	// log.Info("starting piglet-bills service", slog.Any("config", cfg))
 	log.Info("starting piglet-bills service")
 
-	application := app.New(
-		log,
-		cfg.GRPC.GRPCServer,
-		cfg.GRPC.GRPCPort,
-		cfg.DB.MigrationPath,
-		cfg.DB.UserName,
-		cfg.DB.Password,
-		cfg.DB.DBHost,
-		cfg.DB.DBPort,
-		cfg.DB.DBName,
-	)
+	application := app.New(log, cfg)
 
 	go func() {
 		application.GRPCSrv.MustStart()
