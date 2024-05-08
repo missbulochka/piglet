@@ -87,7 +87,7 @@ func (s *Storage) SaveBill(
 	return bill, err
 }
 
-func (s *Storage) BillReturner(
+func (s *Storage) ReturnBill(
 	ctx context.Context,
 	billId string,
 	billName string,
@@ -125,7 +125,7 @@ func (s *Storage) BillReturner(
 	return bill, err
 }
 
-func (s *Storage) SomeBillsReturner(ctx context.Context, billType bool) (bills []*models.Bill, err error) {
+func (s *Storage) ReturnSomeBills(ctx context.Context, billType bool) (bills []*models.Bill, err error) {
 	const op = "piglet-bills | storage.psql.SomeBillsReturner"
 
 	// HACK: подумать о более красивом решении

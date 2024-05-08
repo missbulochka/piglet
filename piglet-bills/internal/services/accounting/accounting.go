@@ -43,12 +43,12 @@ type BillSaver interface {
 }
 
 type BillProvider interface {
-	BillReturner(
+	ReturnBill(
 		ctx context.Context,
 		billId string,
 		billName string,
 	) (bill models.Bill, err error)
-	SomeBillsReturner(ctx context.Context, billType bool) (bills []*models.Bill, err error)
+	ReturnSomeBills(ctx context.Context, billType bool) (bills []*models.Bill, err error)
 	VerifyBill(ctx context.Context, id string) (billType bool, err error)
 }
 
@@ -79,7 +79,7 @@ func (a *Accounting) CreateBill(
 	goalSum decimal.Decimal,
 	date time.Time,
 ) (bill models.Bill, err error) {
-	const op = "pigletBills | accounting.saveBill"
+	const op = "pigletBills | accounting.SaveBill"
 
 	log := a.log.With(
 		slog.String("op", op),
@@ -126,19 +126,19 @@ func (a *Accounting) CreateBill(
 // GetSomeBills retrieves bills from the system by their types and returns them.
 // If an error occurs, it returns an error.
 func (a *Accounting) GetSomeBills(ctx context.Context, billType bool) (bills []*models.Bill, err error) {
-	const op = "pigletBills | accounting.getSomeBills"
+	const op = "pigletBills | accounting.GetSomeBills"
 	log := a.log.With(slog.String("op", op))
 
 	log.Info("searching bills")
 
-	bills, err = a.billProvider.SomeBillsReturner(ctx, billType)
+	bills, err = a.billProvider.ReturnSomeBills(ctx, billType)
 	if err != nil {
-		log.Error("failed to search bill", err)
+		log.Error("failed to search bills", err)
 
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	log.Info("searched bill")
+	log.Info("searched bills")
 	return bills, nil
 }
 
@@ -149,7 +149,7 @@ func (a *Accounting) GetBill(
 	billId string,
 	billName string,
 ) (bill models.Bill, err error) {
-	const op = "pigletBills | accounting.getBill"
+	const op = "pigletBills | accounting.GetBill"
 
 	log := a.log.With(
 		slog.String("op", op),
@@ -160,7 +160,7 @@ func (a *Accounting) GetBill(
 
 	log.Info("searching bill")
 
-	bill, err = a.billProvider.BillReturner(ctx, billId, billName)
+	bill, err = a.billProvider.ReturnBill(ctx, billId, billName)
 	if err != nil {
 		if errors.Is(err, storage.ErrBillNotFound) {
 			log.Warn("bill not found", err)
@@ -188,7 +188,7 @@ func (a *Accounting) UpdateBill(
 	goalSum decimal.Decimal,
 	date time.Time,
 ) (bill models.Bill, err error) {
-	const op = "pigletBills | accounting.updateBill"
+	const op = "pigletBills | accounting.UpdateBill"
 
 	log := a.log.With(
 		slog.String("op", op),
@@ -211,10 +211,8 @@ func (a *Accounting) UpdateBill(
 	log.Info("updating bill")
 
 	monthlyPayment := decimal.New(0, 0)
-	remainder := decimal.New(0, 0)
-	remainder = goalSum.Sub(currentSum)
 	if billType == false {
-		if monthlyPayment, err = countPayment(date, remainder); err != nil {
+		if monthlyPayment, err = countPayment(date, goalSum.Sub(currentSum)); err != nil {
 			log.Warn("something wrong with date", err)
 
 			return models.Bill{}, fmt.Errorf("%s: %w", op, err)
