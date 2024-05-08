@@ -14,7 +14,6 @@ type GRPCConfig struct {
 }
 
 type DataBaseConfig struct {
-	StoragePath   string `envconfig:"PIGLET_BILLS_POSTGRES_STORAGE_PATH" default:"var/lib/postgresql/data"`
 	MigrationPath string `envconfig:"PIGLET_BILLS_MIGRATION_PATH" default:"./migration"`
 	UserName      string `envconfig:"PIGLET_BILLS_USER_NAME" default:"postgres"`
 	Password      string `envconfig:"PIGLET_BILLS_PASSWORD" default:"pass1234"`
