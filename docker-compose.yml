@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  bills_psql:
+    image: "postgres:16.2"
+    env_file:
+      - piglet-bills/pg-db.env
+    volumes:
+      - pg-storage:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  piglet-bills:
+    build:
+      context: .
+      dockerfile: piglet-bills/docker/piglet-bills.Dockerfile
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      bills_psql:
+        condition: service_healthy
+    env_file:
+      - piglet-bills/bills.env
+    restart: unless-stopped
+
+volumes:
+  pg-storage:
