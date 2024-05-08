@@ -40,6 +40,7 @@ type BillSaver interface {
 		date time.Time,
 		monthlyPayment decimal.Decimal,
 	) (bill models.Bill, err error)
+	DeleteBill(ctx context.Context, id string) (err error)
 }
 
 type BillProvider interface {
@@ -238,6 +239,33 @@ func (a *Accounting) UpdateBill(
 
 	log.Info("bill updated")
 	return bill, nil
+}
+
+func (a *Accounting) DeleteBill(ctx context.Context, id string) (success bool, err error) {
+	const op = "pigletBills | accounting.DeleteBill"
+
+	log := a.log.With(
+		slog.String("op", op),
+		// These may be things that are not profitable for business to log
+		slog.String("billId", id),
+	)
+
+	log.Info("deleting bill")
+
+	err = a.billSaver.DeleteBill(ctx, id)
+	if err != nil {
+		if errors.Is(err, storage.ErrBillNotFound) {
+			log.Warn("bill not found", err)
+
+			return false, fmt.Errorf("%s: %w", op, ErrBillExists)
+		}
+		log.Error("failed to delete bill", err)
+
+		return false, fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("bill deleted")
+	return true, nil
 }
 
 func countPayment(futureDate time.Time, sum decimal.Decimal) (monthlyPayment decimal.Decimal, err error) {
