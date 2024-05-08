@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	_ "github.com/lib/pq"
 	"github.com/shopspring/decimal"
 
 	models "piglet-bills-service/internal/domain/model"
