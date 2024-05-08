@@ -47,7 +47,7 @@ type Accounting interface {
 		goalSum decimal.Decimal,
 		date time.Time,
 	) (bill models.Bill, err error)
-	//DeleteBill(ctx context.Context, ID string) (success bool, err error)
+	DeleteBill(ctx context.Context, ID string) (success bool, err error)
 }
 
 func Register(gRPCServer *grpc.Server, accounting Accounting) {
@@ -235,12 +235,21 @@ func (s *serverAPI) DeleteBill(
 	ctx context.Context,
 	req *billsv1.DeleteBillRequest,
 ) (*billsv1.DeleteBillResponse, error) {
-	// TODO: setup validation
+	// HACK: улучшить валидацию
+	if err := orValidation(req.GetId(), ""); err != nil {
+		return nil, err
+	}
 
-	// TODO: setup logic
+	success, err := s.accounting.DeleteBill(ctx, req.GetId())
+	if err != nil {
+		if errors.Is(err, accounting.ErrBillNotFound) {
+			return nil, status.Error(codes.InvalidArgument, "invalid uuid or bill name")
+		}
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
 
 	return &billsv1.DeleteBillResponse{
-		Success: true,
+		Success: success,
 	}, nil
 }
 
