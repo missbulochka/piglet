@@ -30,6 +30,16 @@ type BillSaver interface {
 		date time.Time,
 		monthlyPayment decimal.Decimal,
 	) (bill models.Bill, err error)
+	UpdateBill(
+		ctx context.Context,
+		id string,
+		billName string,
+		currentSum decimal.Decimal,
+		billStatus bool,
+		goalSum decimal.Decimal,
+		date time.Time,
+		monthlyPayment decimal.Decimal,
+	) (bill models.Bill, err error)
 }
 
 type BillProvider interface {
@@ -39,6 +49,7 @@ type BillProvider interface {
 		billName string,
 	) (bill models.Bill, err error)
 	SomeBillsReturner(ctx context.Context, billType bool) (bills []*models.Bill, err error)
+	VerifyBill(ctx context.Context, id string) (billType bool, err error)
 }
 
 var (
@@ -163,6 +174,71 @@ func (a *Accounting) GetBill(
 	}
 
 	log.Info("searched bill")
+	return bill, nil
+}
+
+// UpdateBill update bill in the system and returns it
+// If bill with given id doesn't exist, returns error
+func (a *Accounting) UpdateBill(
+	ctx context.Context,
+	id string,
+	billName string,
+	currentSum decimal.Decimal,
+	billStatus bool,
+	goalSum decimal.Decimal,
+	date time.Time,
+) (bill models.Bill, err error) {
+	const op = "pigletBills | accounting.updateBill"
+
+	log := a.log.With(
+		slog.String("op", op),
+		// These may be things that are not profitable for business to log
+		slog.String("billName", billName),
+	)
+
+	billType, err := a.billProvider.VerifyBill(ctx, id)
+	if err != nil {
+		if errors.Is(err, ErrBillNotFound) {
+			log.Warn("bill doesn't exist", err)
+
+			return models.Bill{}, fmt.Errorf("%s: %w", op, ErrBillExists)
+		}
+		log.Error("failed to update bill", err)
+
+		return models.Bill{}, fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("updating bill")
+
+	monthlyPayment := decimal.New(0, 0)
+	remainder := decimal.New(0, 0)
+	remainder = goalSum.Sub(currentSum)
+	if billType == false {
+		if monthlyPayment, err = countPayment(date, remainder); err != nil {
+			log.Warn("something wrong with date", err)
+
+			return models.Bill{}, fmt.Errorf("%s: %w", op, err)
+		}
+	}
+
+	bill, err = a.billSaver.UpdateBill(
+		ctx,
+		id,
+		billName,
+		currentSum,
+		billStatus,
+		goalSum,
+		date,
+		monthlyPayment,
+	)
+	if err != nil {
+		log.Error("failed to update bill", err)
+
+		return models.Bill{}, fmt.Errorf("%s: %w", op, err)
+	}
+	bill.BillType = billType
+
+	log.Info("bill updated")
 	return bill, nil
 }
 
