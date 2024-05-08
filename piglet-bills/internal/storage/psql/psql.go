@@ -188,3 +188,79 @@ func (s *Storage) SomeBillsReturner(ctx context.Context, billType bool) (bills [
 	}
 	return bills, nil
 }
+
+func (s *Storage) UpdateBill(
+	ctx context.Context,
+	id string,
+	billName string,
+	currentSum decimal.Decimal,
+	billStatus bool,
+	goalSum decimal.Decimal,
+	date time.Time,
+	monthlyPayment decimal.Decimal,
+) (bill models.Bill, err error) {
+	const op = "piglet-bills | storage.psql.UpdateBill"
+
+	row := s.db.QueryRowContext(
+		ctx,
+		storage.UpdateBill,
+		id,
+		billName,
+		currentSum,
+	)
+	err = row.Scan(
+		&bill.Name,
+		&bill.CurrentSum,
+		&bill.BillType,
+	)
+	if err != nil {
+		return bill, fmt.Errorf("%s: %w", op, err)
+	}
+
+	if bill.BillType {
+		row = s.db.QueryRowContext(
+			ctx,
+			storage.UpdateAccount,
+			id,
+			billStatus,
+		)
+		err = row.Scan(
+			&bill.BillStatus,
+		)
+	} else {
+		row = s.db.QueryRowContext(
+			ctx,
+			storage.UpdateGoal,
+			id,
+			goalSum,
+			date,
+			monthlyPayment,
+		)
+		err = row.Scan(
+			&bill.GoalSum,
+			&bill.Date,
+			&bill.MonthlyPayment,
+		)
+	}
+	if err != nil {
+		return bill, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return bill, err
+}
+
+func (s *Storage) VerifyBill(
+	ctx context.Context,
+	id string,
+) (billType bool, err error) {
+	const op = "piglet-bills | storage.psql.VerifyBill"
+
+	row := s.db.QueryRowContext(ctx, storage.VerifyBill, id)
+	err = row.Scan(&billType)
+	// HACK: в случае ошибки возвращает false (что является в БД типом goals)
+	if err != nil {
+		return false, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return billType, nil
+}

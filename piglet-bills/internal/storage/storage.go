@@ -76,3 +76,28 @@ const (
 		ORDER BY bill_id
 	`
 )
+
+const (
+	UpdateBill = `
+		UPDATE bills
+		SET bill_name = $2, current_sum = $3
+		WHERE id = $1
+		RETURNING bill_name, current_sum, bill_type;
+	`
+	UpdateAccount = `
+		UPDATE accounts
+		SET bill_status = $2
+		WHERE bill_id = $1
+		RETURNING bill_status;
+	`
+	UpdateGoal = `
+		UPDATE goals
+		SET goal_sum = $2, date = $3, monthly_payment = $4
+		WHERE bill_id = $1
+		RETURNING goal_sum, date, monthly_payment;
+	`
+)
+
+const (
+	VerifyBill = `SELECT bill_type FROM bills WHERE id::text = $1 LIMIT 1;`
+)
