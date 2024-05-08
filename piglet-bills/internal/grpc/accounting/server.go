@@ -38,12 +38,15 @@ type Accounting interface {
 		billId string,
 		billName string,
 	) (bill models.Bill, err error)
-	//UpdateBill(ctx context.Context,
-	//	billStatus bool,
-	//	billName string,
-	//	currentSum float32,
-	//	date string,
-	//) (bill models.Bill, err error)
+	UpdateBill(
+		ctx context.Context,
+		id string,
+		billName string,
+		currentSum decimal.Decimal,
+		billStatus bool,
+		goalSum decimal.Decimal,
+		date time.Time,
+	) (bill models.Bill, err error)
 	//DeleteBill(ctx context.Context, ID string) (success bool, err error)
 }
 
@@ -183,19 +186,47 @@ func (s *serverAPI) UpdateBill(
 	ctx context.Context,
 	req *billsv1.UpdateBillRequest,
 ) (*billsv1.BillResponse, error) {
-	// TODO: setup validation
+	// HACK: улучшить валидацию
+	if err := orValidation(req.GetId(), req.GetBillName()); err != nil {
+		return nil, err
+	}
 
-	// TODO: setup logic
+	// HACK: обработка ошибок
+	currentSum, _ := decimal.NewFromString(strconv.FormatUint(uint64(req.GetCurrentSum()), 10))
+	goalSum, _ := decimal.NewFromString(strconv.FormatUint(uint64(req.GetGoalSum()), 10))
+
+	bill, err := s.accounting.UpdateBill(
+		ctx,
+		req.GetId(),
+		req.GetBillName(),
+		currentSum,
+		req.GetBillStatus(),
+		goalSum,
+		req.GetDate().AsTime(),
+	)
+	if err != nil {
+		if errors.Is(err, accounting.ErrBillNotFound) {
+			return nil, status.Error(codes.InvalidArgument, "invalid credits")
+		}
+
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+
+	// HACK: поработать над преобразованиями и обработкой ошибок
+	newCurrentSum, _ := bill.CurrentSum.Float64()
+	newGoalSum, _ := bill.GoalSum.Float64()
+	monthlyPayment := uint32(int32(bill.MonthlyPayment.IntPart()))
 
 	return &billsv1.BillResponse{
 		Bill: &billsv1.Bill{
-			Id:             "",
-			BillType:       false,
-			BillStatus:     false,
-			BillName:       "",
-			CurrentSum:     0,
-			Date:           nil,
-			MonthlyPayment: 0,
+			Id:             bill.ID,
+			BillType:       bill.BillType,
+			BillStatus:     bill.BillStatus,
+			BillName:       bill.Name,
+			CurrentSum:     float32(newCurrentSum),
+			GoalSum:        float32(newGoalSum),
+			Date:           timestamppb.New(bill.Date),
+			MonthlyPayment: monthlyPayment,
 		},
 	}, nil
 }
