@@ -249,6 +249,34 @@ func (s *Storage) UpdateBill(
 	return bill, err
 }
 
+func (s *Storage) DeleteBill(ctx context.Context, id string) (err error) {
+	const op = "piglet-bills | storage.psql.DeleteBill"
+
+	// HACK: восстановление строки в случае, если не удалось удалить записи из зависимых таблиц
+	var billType bool
+	row := s.db.QueryRowContext(ctx, storage.VerifyBill, id)
+	err = row.Scan(&billType)
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	if billType {
+		_, err = s.db.ExecContext(ctx, storage.DeleteAccount, id)
+	} else {
+		_, err = s.db.ExecContext(ctx, storage.DeleteGoal, id)
+	}
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	row = s.db.QueryRowContext(ctx, storage.DeleteBill, id)
+	if row.Err() != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	return nil
+}
+
 func (s *Storage) VerifyBill(
 	ctx context.Context,
 	id string,

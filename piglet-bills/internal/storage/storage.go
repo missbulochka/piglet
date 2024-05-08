@@ -99,5 +99,11 @@ const (
 )
 
 const (
+	DeleteBill    = `DELETE FROM bills WHERE id = $1 RETURNING bill_type;`
+	DeleteAccount = `DELETE FROM accounts WHERE bill_id = $1;`
+	DeleteGoal    = `DELETE FROM goals WHERE bill_id = $1;`
+)
+
+const (
 	VerifyBill = `SELECT bill_type FROM bills WHERE id::text = $1 LIMIT 1;`
 )
