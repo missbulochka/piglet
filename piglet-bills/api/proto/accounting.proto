@@ -53,11 +53,13 @@ message GetBillRequest {
 }
 
 message UpdateBillRequest {
-    bool billStatus = 1;
+    string id = 1;
     string billName = 2;
     float currentSum = 3;
     reserved 4;
-    string date = 5;
+    bool billStatus = 5;
+    float goalSum = 6;
+    google.protobuf.Timestamp date = 7;
 }
 
 message DeleteBillRequest {
