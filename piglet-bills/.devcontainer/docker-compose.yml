@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  bills_psql:
+  bills-psql:
     image: "postgres:16.2"
-    container_name: bills_psql
+    container_name: bills-psql
     ports:
       - "127.0.0.1:5432:5432"
     env_file:
@@ -17,6 +17,24 @@ services:
       retries: 5
     restart: unless-stopped
 
+  piglet-rabbitmq:
+    image: rabbitmq:3.13.2-management
+    container_name: piglet-rabbitmq
+    ports:
+      - "127.0.0.1:15672:15672"
+      - "127.0.0.1:5672:5672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+    volumes:
+      - ../../rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
   dev_piglet-bills:
     build:
       context: ../..
@@ -26,10 +44,16 @@ services:
     ports:
       - "127.0.0.1:8080:8080"
     depends_on:
-      bills_psql:
+      bills-psql:
+        condition: service_healthy
+      piglet-rabbitmq:
         condition: service_healthy
     env_file:
       - ../bills.env
     volumes:
       - ../:/workspaces/dev_piglet
     restart: unless-stopped
+
+volumes:
+  pg-storage:
+  rabbitmq:

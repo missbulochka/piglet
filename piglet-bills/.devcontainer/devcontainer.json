@@ -5,7 +5,8 @@
   ],
   "service": "dev_piglet-bills",
   "runServices": [
-    "bills_psql",
+    "bills-psql",
+    "piglet-rabbitmq",
   ],
   "forwardPorts": [
     8080,
