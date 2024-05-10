@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"log/slog"
+	"piglet-bills-service/internal/app/rmq"
 
 	"piglet-bills-service/internal/services/accounting"
 	"piglet-bills-service/internal/storage/psql"
@@ -20,6 +21,13 @@ func New(
 	log *slog.Logger,
 	cfg *config.Config,
 ) *App {
+	rmqConn, err := rmq.InitConnection(log, &cfg.RMQConfig)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(rmqConn)
+
 	if err := pgmigration.RunMigration(
 		"file://"+cfg.DB.MigrationPath,
 		fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable",
