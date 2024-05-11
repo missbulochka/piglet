@@ -3,33 +3,14 @@ version: '3.8'
 services:
   bills_psql:
     image: "postgres:16.2"
-    ports:
-      - "127.0.0.1:5432:5432"
     env_file:
       - piglet-bills/pg-db.env
     volumes:
       - pg-storage:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
-  piglet-rabbitmq:
-    image: rabbitmq:3.13.2-management
-    ports:
-      - "127.0.0.1:15672:15672"
-      - "127.0.0.1:5672:5672"
-    environment:
-      - RABBITMQ_DEFAULT_USER=user
-      - RABBITMQ_DEFAULT_PASS=password
-    volumes:
-      - ./rabbitmq:/var/lib/rabbitmq
-    healthcheck:
-      test: ["CMD", "rabbitmqctl", "status"]
-      interval: 30s
-      timeout: 10s
       retries: 5
     restart: unless-stopped
 
@@ -41,8 +22,6 @@ services:
       - "127.0.0.1:8080:8080"
     depends_on:
       bills_psql:
-        condition: service_healthy
-      piglet-rabbitmq:
         condition: service_healthy
     env_file:
       - piglet-bills/bills.env
