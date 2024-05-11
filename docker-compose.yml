@@ -1,8 +1,11 @@
 version: '3.8'
 
 services:
-  bills_psql:
+  bills-psql:
     image: "postgres:16.2"
+    container_name: bills-psql
+    ports:
+      - "127.0.0.1:5432:5432"
     env_file:
       - piglet-bills/pg-db.env
     volumes:
@@ -18,10 +21,11 @@ services:
     build:
       context: .
       dockerfile: piglet-bills/docker/piglet-bills.Dockerfile
+    container_name: piglet-bills
     ports:
       - "127.0.0.1:8080:8080"
     depends_on:
-      bills_psql:
+      bills-psql:
         condition: service_healthy
     env_file:
       - piglet-bills/bills.env
