@@ -37,7 +37,7 @@ devcontainer exec --workspace-folder . go run /workspaces/dev_piglet/cmd/main.go
 
 To stop containers use:
 ```bash
-docker stop dev_piglet-bills bills_psql && docker rm dev_piglet-bills bills_psql
+docker stop dev_piglet-bills bills-psql && docker rm dev_piglet-bills bills-psql
 ```
 
 ## Database (PostgreSQL)
