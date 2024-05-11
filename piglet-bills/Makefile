@@ -7,9 +7,8 @@ up-dev-bills:
 	devcontainer up --workspace-folder .
 
 # Down devcontainer (and dependencies)
-stop-dev-bills:
-	docker stop dev_piglet-bills bills_psql piglet-rabbitmq && \
-		docker rm dev_piglet-bills bills_psql piglet-rabbitmq
+down-dev-bills:
+	docker stop dev_piglet-bills bills_psql && docker rm dev_piglet-bills bills_psql
 
 # Run devcontainer
 run-dev-bills:
