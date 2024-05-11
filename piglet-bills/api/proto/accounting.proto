@@ -1,18 +1,21 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 
 package accounting;
 
 option go_package = "api/proto/gen;billsv1";
 
 service pigletBills {
-  rpc CreateBill (CreateBillRequest) returns (BillResponse);
-  rpc GetAllAccounts (GetSomeBillsRequest) returns (GetSomeBillsResponse);
-  rpc GetAllGoals (GetSomeBillsRequest) returns (GetSomeBillsResponse);
-  rpc GetBill (GetBillRequest) returns (BillResponse);
-  rpc UpdateBill (UpdateBillRequest) returns (BillResponse);
-  rpc DeleteBill (DeleteBillRequest) returns (DeleteBillResponse);
+    rpc CreateBill (CreateBillRequest) returns (BillResponse);
+    rpc GetAllAccounts (GetSomeBillsRequest) returns (GetSomeBillsResponse);
+    rpc GetAllGoals (GetSomeBillsRequest) returns (GetSomeBillsResponse);
+    rpc GetBill (IdRequest) returns (BillResponse);
+    rpc UpdateBill (UpdateBillRequest) returns (BillResponse);
+    rpc DeleteBill (IdRequest) returns (SuccessResponse);
+    rpc VerifyBill (IdRequest) returns (SuccessResponse);
+    rpc FixBillSum (FixBillSumRequest) returns (google.protobuf.Empty);
 }
 
 message Bill {
@@ -47,11 +50,6 @@ message GetSomeBillsResponse {
     repeated Bill bills = 1;
 }
 
-message GetBillRequest {
-    string id = 1;
-    string billName = 2;
-}
-
 message UpdateBillRequest {
     string id = 1;
     string billName = 2;
@@ -62,10 +60,15 @@ message UpdateBillRequest {
     google.protobuf.Timestamp date = 7;
 }
 
-message DeleteBillRequest {
+message IdRequest {
     string id = 1;
 }
 
-message DeleteBillResponse {
+message SuccessResponse {
     bool success = 1;
+}
+
+message FixBillSumRequest {
+    string id = 1;
+    float sum = 2;
 }

@@ -3,6 +3,7 @@ package accountingrpc
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -12,6 +13,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	billsv1 "piglet-bills-service/api/proto/gen"
@@ -36,7 +38,6 @@ type Accounting interface {
 	GetBill(
 		ctx context.Context,
 		billId string,
-		billName string,
 	) (bill models.Bill, err error)
 	UpdateBill(
 		ctx context.Context,
@@ -47,7 +48,9 @@ type Accounting interface {
 		goalSum decimal.Decimal,
 		date time.Time,
 	) (bill models.Bill, err error)
-	DeleteBill(ctx context.Context, ID string) (success bool, err error)
+	DeleteBill(ctx context.Context, id string) (success bool, err error)
+	VerifyBill(ctx context.Context, id string) (success bool, err error)
+	FixBillSum(ctx context.Context, id string, sum decimal.Decimal) (err error)
 }
 
 func Register(gRPCServer *grpc.Server, accounting Accounting) {
@@ -149,17 +152,17 @@ func (s *serverAPI) GetAllGoals(
 
 func (s *serverAPI) GetBill(
 	ctx context.Context,
-	req *billsv1.GetBillRequest,
+	req *billsv1.IdRequest,
 ) (*billsv1.BillResponse, error) {
 	// HACK: улучшить валидацию
-	if err := orValidation(req.GetId(), req.GetBillName()); err != nil {
+	if err := orValidation(req.GetId(), ""); err != nil {
 		return nil, err
 	}
 
-	bill, err := s.accounting.GetBill(ctx, req.GetId(), req.GetBillName())
+	bill, err := s.accounting.GetBill(ctx, req.GetId())
 	if err != nil {
 		if errors.Is(err, accounting.ErrBillNotFound) {
-			return nil, status.Error(codes.InvalidArgument, "invalid uuid or bill name")
+			return nil, status.Error(codes.InvalidArgument, "invalid uuid")
 		}
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
@@ -233,8 +236,8 @@ func (s *serverAPI) UpdateBill(
 
 func (s *serverAPI) DeleteBill(
 	ctx context.Context,
-	req *billsv1.DeleteBillRequest,
-) (*billsv1.DeleteBillResponse, error) {
+	req *billsv1.IdRequest,
+) (*billsv1.SuccessResponse, error) {
 	// HACK: улучшить валидацию
 	if err := orValidation(req.GetId(), ""); err != nil {
 		return nil, err
@@ -243,14 +246,52 @@ func (s *serverAPI) DeleteBill(
 	success, err := s.accounting.DeleteBill(ctx, req.GetId())
 	if err != nil {
 		if errors.Is(err, accounting.ErrBillNotFound) {
-			return nil, status.Error(codes.InvalidArgument, "invalid uuid or bill name")
+			return nil, status.Error(codes.InvalidArgument, "invalid uuid")
 		}
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
 
-	return &billsv1.DeleteBillResponse{
+	return &billsv1.SuccessResponse{
 		Success: success,
 	}, nil
+}
+
+func (s *serverAPI) VerifyBill(
+	ctx context.Context,
+	req *billsv1.IdRequest,
+) (*billsv1.SuccessResponse, error) {
+	// HACK: улучшить валидацию
+	if err := orValidation(req.GetId(), ""); err != nil {
+		return nil, err
+	}
+
+	success, err := s.accounting.VerifyBill(ctx, req.GetId())
+	if err != nil {
+		success = false
+	}
+
+	return &billsv1.SuccessResponse{
+		Success: success,
+	}, nil
+}
+
+func (s *serverAPI) FixBillSum(
+	ctx context.Context,
+	req *billsv1.FixBillSumRequest,
+) (*emptypb.Empty, error) {
+	// HACK: улучшить валидацию
+	if err := orValidation(req.GetId(), ""); err != nil {
+		fmt.Println("invalid uuid")
+	}
+
+	sum, _ := decimal.NewFromString(strconv.FormatUint(uint64(req.GetSum()), 10))
+
+	err := s.accounting.FixBillSum(ctx, req.GetId(), sum)
+	if err != nil {
+		return &emptypb.Empty{}, status.Errorf(codes.Internal, "internal error")
+	}
+
+	return &emptypb.Empty{}, nil
 }
 
 func validation(

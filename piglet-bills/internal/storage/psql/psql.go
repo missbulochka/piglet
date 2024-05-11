@@ -91,12 +91,11 @@ func (s *Storage) SaveBill(
 func (s *Storage) ReturnBill(
 	ctx context.Context,
 	billId string,
-	billName string,
 ) (bill models.Bill, err error) {
-	const op = "piglet-bills | storage.psql.BillReturner"
+	const op = "piglet-bills | storage.psql.ReturnBill"
 
 	// HACK: обработка ошибки парсинга uuid
-	row := s.db.QueryRowContext(ctx, storage.GetOneBill, billId, billName)
+	row := s.db.QueryRowContext(ctx, storage.GetOneBill, billId)
 	err = row.Scan(
 		&bill.ID,
 		&bill.Name,
@@ -127,7 +126,7 @@ func (s *Storage) ReturnBill(
 }
 
 func (s *Storage) ReturnSomeBills(ctx context.Context, billType bool) (bills []*models.Bill, err error) {
-	const op = "piglet-bills | storage.psql.SomeBillsReturner"
+	const op = "piglet-bills | storage.psql.ReturnSomeBills"
 
 	// HACK: подумать о более красивом решении
 	rows, err := s.db.QueryContext(ctx, storage.GetSomeBills, billType)

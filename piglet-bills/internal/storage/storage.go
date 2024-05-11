@@ -45,7 +45,7 @@ const (
 	GetOneBill = `
 		SELECT id, bill_name, current_sum, bill_type
 		FROM bills 
-		WHERE ($1 = '' OR id::text = $1) OR ($2 = '' OR bill_name = $2)
+		WHERE id::text = $1
 		LIMIT 1;
 	`
 

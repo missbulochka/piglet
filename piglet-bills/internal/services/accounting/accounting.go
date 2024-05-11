@@ -45,10 +45,7 @@ type BillSaver interface {
 
 type BillProvider interface {
 	ReturnBill(
-		ctx context.Context,
-		billId string,
-		billName string,
-	) (bill models.Bill, err error)
+		ctx context.Context, billId string) (bill models.Bill, err error)
 	ReturnSomeBills(ctx context.Context, billType bool) (bills []*models.Bill, err error)
 	VerifyBill(ctx context.Context, id string) (billType bool, err error)
 }
@@ -148,7 +145,6 @@ func (a *Accounting) GetSomeBills(ctx context.Context, billType bool) (bills []*
 func (a *Accounting) GetBill(
 	ctx context.Context,
 	billId string,
-	billName string,
 ) (bill models.Bill, err error) {
 	const op = "pigletBills | accounting.GetBill"
 
@@ -156,12 +152,11 @@ func (a *Accounting) GetBill(
 		slog.String("op", op),
 		// These may be things that are not profitable for business to log
 		slog.String("billId", billId),
-		slog.String("billName", billName),
 	)
 
 	log.Info("searching bill")
 
-	bill, err = a.billProvider.ReturnBill(ctx, billId, billName)
+	bill, err = a.billProvider.ReturnBill(ctx, billId)
 	if err != nil {
 		if errors.Is(err, storage.ErrBillNotFound) {
 			log.Warn("bill not found", err)
@@ -194,7 +189,7 @@ func (a *Accounting) UpdateBill(
 	log := a.log.With(
 		slog.String("op", op),
 		// These may be things that are not profitable for business to log
-		slog.String("billName", billName),
+		slog.String("bill id", id),
 	)
 
 	billType, err := a.billProvider.VerifyBill(ctx, id)
@@ -236,11 +231,14 @@ func (a *Accounting) UpdateBill(
 		return models.Bill{}, fmt.Errorf("%s: %w", op, err)
 	}
 	bill.BillType = billType
+	bill.ID = id
 
 	log.Info("bill updated")
 	return bill, nil
 }
 
+// DeleteBill delete bill in the system and returns success
+// If bill with given id doesn't exist, returns error
 func (a *Accounting) DeleteBill(ctx context.Context, id string) (success bool, err error) {
 	const op = "pigletBills | accounting.DeleteBill"
 
@@ -266,6 +264,82 @@ func (a *Accounting) DeleteBill(ctx context.Context, id string) (success bool, e
 
 	log.Info("bill deleted")
 	return true, nil
+}
+
+// VerifyBill find bill in the system and returns its type
+// If bill with given id doesn't exist, returns error
+func (a *Accounting) VerifyBill(ctx context.Context, id string) (success bool, err error) {
+	const op = "pigletBills | accounting.VerifyBill"
+
+	log := a.log.With(
+		slog.String("op", op),
+		// These may be things that are not profitable for business to log
+		slog.String("bill id", id),
+	)
+
+	log.Info("bill verifying")
+
+	_, err = a.billProvider.VerifyBill(ctx, id)
+	if err != nil {
+		log.Error("failed to search bill", err)
+
+		return false, fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("end of process")
+
+	return true, nil
+}
+
+// FixBillSum find bill in the system and update its sum
+// If bill with given id doesn't exist, returns error
+func (a *Accounting) FixBillSum(ctx context.Context, id string, sum decimal.Decimal) (err error) {
+	const op = "pigletBills | accounting.FixVerifySum"
+
+	log := a.log.With(
+		slog.String("op", op),
+		// These may be things that are not profitable for business to log
+		slog.String("bill id", id),
+	)
+
+	// HACK: обработка ошибок в случае, если не найден счет
+	bill, err := a.billProvider.ReturnBill(ctx, id)
+	if err != nil {
+		if errors.Is(err, ErrBillNotFound) {
+			log.Info("bill doesn't exist")
+
+			return fmt.Errorf("%s: %w", op, err)
+		}
+		log.Error("failed to update bill", err)
+
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("updating bill")
+
+	// HACK: проверка вычислений при отрицательных суммах
+	bill.CurrentSum = bill.CurrentSum.Add(sum)
+	// HACK: перерасчет ежемесячного платежа при вводе бОльшей суммы
+
+	// HACK: обновление конкретного счета
+	bill, err = a.billSaver.UpdateBill(
+		ctx,
+		id,
+		bill.Name,
+		bill.CurrentSum,
+		bill.BillStatus,
+		bill.GoalSum,
+		bill.Date,
+		bill.MonthlyPayment,
+	)
+	if err != nil {
+		log.Info("bill doesn't updated")
+
+		return fmt.Errorf("%s: %w", op, err)
+	}
+	log.Info("bill updated")
+
+	return nil
 }
 
 func countPayment(futureDate time.Time, sum decimal.Decimal) (monthlyPayment decimal.Decimal, err error) {
