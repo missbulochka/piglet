@@ -2,7 +2,7 @@
 
 # You can build docker-image base (*.build.Dockerfile). This image is common for all services.
 docker build \
-        -t piglet_base:0.1.0 \
+        -t piglet-bills_base:0.1.0 \
         -f piglet-bills/.devcontainer/base.build.Dockerfile \
         ./
 

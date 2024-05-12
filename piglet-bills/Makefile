@@ -17,13 +17,13 @@ run-dev-bills:
 # Migrate up
 up-migrate-bills:
 	migrate -path migration \
-            -database "postgresql://postgres:pass1234@bills_psql:5432/Accounting?sslmode=disable" \
+            -database "postgresql://postgres:pass1234@bills-psql:5432/Accounting?sslmode=disable" \
             -verbose \
             up
 
 # Migrate down
 down-migrate-bills:
 	migrate -path migration \
-            -database "postgresql://postgres:pass1234@bills_psql:5432/Accounting?sslmode=disable" \
+            -database "postgresql://postgres:pass1234@bills-psql:5432/Accounting?sslmode=disable" \
             -verbose \
             down

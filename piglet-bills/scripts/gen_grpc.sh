@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Generate Client and Server code for auth-service using proto file
+# Generate Client and Server code for bills-service using proto file
 mkdir -p api/proto/gen
 protoc -I=. \
     --go_out=. \

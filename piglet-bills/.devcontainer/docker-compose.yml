@@ -9,7 +9,7 @@ services:
     env_file:
       - ../pg-db.env
     volumes:
-      - ../pg-storage:/var/lib/postgresql/data
+      - ../pg-storage-bills:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB" ]
       interval: 5s
@@ -33,3 +33,6 @@ services:
     volumes:
       - ../:/workspaces/dev_piglet
     restart: unless-stopped
+
+volumes:
+  pg-storage-bills:
