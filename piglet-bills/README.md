@@ -22,7 +22,7 @@ You can use devcontainers/cli to set up environment and build the project manual
 ```bash
 # build the docker image
 docker build \
-        -t piglet_base:0.1.0 \
+        -t piglet-bills_base:0.1.0 \
         -f .devcontainer/base.build.Dockerfile \
         ./
 
@@ -37,7 +37,7 @@ devcontainer exec --workspace-folder . go run /workspaces/dev_piglet/cmd/main.go
 
 To stop containers use:
 ```bash
-docker stop dev_piglet-bills bills_psql && docker rm dev_piglet-bills bills_psql
+docker stop dev_piglet-bills bills-psql && docker rm dev_piglet-bills bills-psql
 ```
 
 ## Database (PostgreSQL)
@@ -51,13 +51,13 @@ Use the following commands to create and delete database required for the Piglet
 ```bash
 # create database
 docker exec \
-        -it bills_psql \
+        -it bills-psql \
         createdb --username=$POSTGRES_USER --owner=$POSTGRES_USER \
         Accounting
 
 # delete database 
 docker exec \
-        -it bills_psql \
+        -it bills-psql \
         dropdb --username=$POSTGRES_USER \
         Accounting
 ```

@@ -17,7 +17,6 @@ const (
 )
 
 func main() {
-	// TODO: иницилизировать объект конфига (+RabbitMQ)
 	cfg := config.MustLoadConfig()
 
 	log := setupLogger(cfg.Env)
