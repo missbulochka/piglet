@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package transactions;
+
+option go_package = "api/proto/gen;transv1";
+
+service PigletTransactions {
+  rpc CreateTransaction (CreateTransactionRequest) returns (TransactionResponse);
+  rpc UpdateTransaction (UpdateTransactionRequest) returns (TransactionResponse);
+  rpc DeleteTransaction (IdRequest) returns (SuccessResponse);
+  rpc GetTransaction (IdRequest) returns (TransactionResponse);
+  rpc GetAllTransactions (EmptyRequest) returns (GetAllTransactionsResponse);
+
+  rpc AddCategory (AddCategoryRequest) returns (CategoryResponse);
+  rpc UpdateCategory (Category) returns (CategoryResponse);
+  rpc GetCategory (IdRequest) returns (CategoryResponse);
+  rpc GetAllCategories (EmptyRequest) returns (GetAllCategoriesResponse);
+  rpc DeleteCategory (IdRequest) returns (SuccessResponse);
+}
+
+message CreateTransactionRequest {
+  google.protobuf.Timestamp date = 1;
+  int32 trans_type = 2;
+  float sum = 3;
+  string comment = 4;
+  string idCategory = 5;
+  bool debtType = 6;
+  string idBillTo = 7;
+  string idBillFrom = 8;
+  string person = 9;
+  bool repeat = 10;
+}
+
+message UpdateTransactionRequest {
+  string id = 1;
+  google.protobuf.Timestamp date = 2;
+  float sum = 3;
+  string comment = 4;
+  string idCategory = 5;
+  bool debtType = 6;
+  string idBillTo = 7;
+  string idBillFrom = 8;
+  string person = 9;
+  bool repeat = 10;
+}
+
+message GetAllTransactionsResponse {
+  repeated Transaction transactions = 1;
+}
+
+message AddCategoryRequest {
+  bool type = 1;
+  string name = 2;
+  bool mandatory = 3;
+}
+
+message GetAllCategoriesResponse {
+  repeated Category category = 1;
+}
+
+
+message IdRequest {
+  string id = 1;
+}
+
+message EmptyRequest {
+
+}
+
+message TransactionResponse {
+  Transaction transaction = 1;
+}
+
+message SuccessResponse {
+  bool success = 1;
+}
+
+message CategoryResponse {
+  Category category = 1;
+}
+
+message Transaction {
+  string id = 1;
+  google.protobuf.Timestamp date = 2;
+  int32 trans_type = 3;
+  float sum = 4;
+  string comment = 5;
+  string idCategory = 6;
+  bool debtType = 7;
+  string idBillTo = 8;
+  string idBillFrom = 9;
+  string person = 10;
+  bool repeat = 11;
+}
+
+message Category {
+  string id = 1;
+  bool type = 2;
+  string categoryName = 3;
+  bool mandatory = 4;
+}
