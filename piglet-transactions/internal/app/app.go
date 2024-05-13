@@ -7,8 +7,8 @@ import (
 	grpcapp "piglet-transactions-service/internal/app/grpc"
 	"piglet-transactions-service/internal/config"
 	"piglet-transactions-service/internal/services/transactions"
-	migrator "piglet-transactions-service/storage/pg-migration"
-	psql "piglet-transactions-service/storage/postgres"
+	migrator "piglet-transactions-service/internal/storage/pg-migration"
+	psql "piglet-transactions-service/internal/storage/postgres"
 )
 
 type App struct {
