@@ -36,3 +36,9 @@ type ValTransfer struct {
 	IdBillFrom string `validator:"required,uuid4"`
 	IdBillTo   string `validator:"required,uuid4"`
 }
+
+type ValCategory struct {
+	CategoryType bool
+	Name         string `validator:"required"`
+	Mandatory    bool
+}

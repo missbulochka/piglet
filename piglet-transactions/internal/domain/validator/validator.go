@@ -2,10 +2,10 @@ package validation
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -94,6 +94,30 @@ func TransValidator(
 	}
 
 	return trans, nil
+}
+
+func CategoryValidator(
+	categoryType bool,
+	name string,
+	mandatory bool,
+) (category models.Category, err error) {
+	val := validator.New(validator.WithRequiredStructEnabled())
+
+	if err = val.Struct(
+		&ValCategory{
+			CategoryType: categoryType,
+			Name:         name,
+			Mandatory:    mandatory,
+		}); err != nil {
+		return category, fmt.Errorf("invalid category creditals: %v", codes.InvalidArgument)
+	}
+
+	// HACK: обработка ошибок
+	category.CategoryType = categoryType
+	category.Name = name
+	category.Mandatory = mandatory
+
+	return category, nil
 }
 
 func simpleVal(
