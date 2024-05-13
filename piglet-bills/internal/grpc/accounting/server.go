@@ -16,7 +16,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	billsv1 "piglet-bills-service/api/proto/gen"
+	billsv1 "github.com/missbulochka/protos/gen/piglet-bills"
 	models "piglet-bills-service/internal/domain/model"
 	"piglet-bills-service/internal/services/accounting"
 )
