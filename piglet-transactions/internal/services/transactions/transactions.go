@@ -3,10 +3,7 @@ package transactions
 import (
 	"context"
 	"log/slog"
-	"time"
-
-	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
+	"piglet-transactions-service/internal/domain/models"
 )
 
 type Transactions struct {
@@ -18,6 +15,7 @@ type TransactionSaver interface {
 	SaveTransaction(ctx context.Context)
 }
 
+// New returns a new intarface of the Transactions service
 func New(log *slog.Logger, transSaver TransactionSaver) *Transactions {
 	return &Transactions{
 		log:        log,
@@ -25,18 +23,24 @@ func New(log *slog.Logger, transSaver TransactionSaver) *Transactions {
 	}
 }
 
+// CreateTransaction create new transaction in the system and returns it
+// If bill or category with given names don't exist, returns error
 func (t *Transactions) CreateTransaction(
 	ctx context.Context,
-	date time.Time,
-	transType uint8,
-	sum decimal.Decimal,
-	comment string,
-	idCategory uuid.UUID,
-	debtType bool,
-	idBillTo uuid.UUID,
-	idBillFrom uuid.UUID,
-	person string,
-	repeat bool,
-) (err error) {
-	panic("implement me")
+	trans models.Transaction,
+) (savedTrans models.Transaction, err error) {
+	const op = "pigletTransactions | transactions.CreateTransaction"
+	log := t.log.With(slog.String("op", op))
+
+	log.Info("Saving transaction")
+
+	// TODO: VerifyBill()
+
+	// TODO: SaveTransaction()
+
+	// TODO: FixBillSum()
+
+	log.Info("Transaction saved")
+
+	return trans, nil
 }
