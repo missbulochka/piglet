@@ -19,13 +19,13 @@ type App struct {
 
 func New(
 	log *slog.Logger,
-	transsactionsService transactionsgrpc.Transactions,
+	transactionsService transactionsgrpc.Transactions,
 	server string,
 	port string,
 ) *App {
 	gRPCServer := grpc.NewServer()
 
-	transactionsgrpc.Register(gRPCServer, transsactionsService)
+	transactionsgrpc.Register(gRPCServer, transactionsService)
 
 	return &App{
 		log:        log,
