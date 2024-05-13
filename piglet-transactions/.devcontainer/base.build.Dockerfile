@@ -18,8 +18,8 @@ RUN groupadd --gid ${USER_GID} ${USERNAME} \
 USER ${USERNAME}:${USERNAME}
 
 WORKDIR /workspaces/dev_piglet
-#COPY ./piglet-transactions/go.mod .
+COPY piglet-transactions/go.mod .
 
-#RUN go mod download
+RUN go mod download
 
 EXPOSE 8081

@@ -19,8 +19,8 @@ services:
 
   dev_piglet-transactions:
     build:
-      context: ..
-      dockerfile: .devcontainer/base.build.Dockerfile
+      context: ../..
+      dockerfile: piglet-transactions/.devcontainer/base.build.Dockerfile
     container_name: dev_piglet-transactions
     command: tail -f /dev/null
     ports:
@@ -44,7 +44,7 @@ services:
     env_file:
       - ../../piglet-bills/pg-db.env
     volumes:
-      - pg-storage-bills:/var/lib/postgresql/data
+      - ../../piglet-bills/pg-storage-bills:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB" ]
       interval: 5s
@@ -53,9 +53,7 @@ services:
     restart: unless-stopped
 
   piglet-bills:
-    build:
-      context: ../..
-      dockerfile: piglet-bills/docker/piglet-bills.Dockerfile
+    image: piglet-bills:0.1.0
     container_name: piglet-bills
     ports:
       - "127.0.0.1:8080:8080"
