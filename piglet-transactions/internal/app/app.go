@@ -7,6 +7,7 @@ import (
 	grpcapp "piglet-transactions-service/internal/app/grpc"
 	"piglet-transactions-service/internal/config"
 	migrator "piglet-transactions-service/storage/pg-migration"
+	psql "piglet-transactions-service/storage/postgres"
 )
 
 type App struct {
@@ -28,7 +29,19 @@ func New(log *slog.Logger, cfg *config.Config) *App {
 		panic(err)
 	}
 
-	// TODO: connect data base
+	storage, err := psql.New(
+		log,
+		fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+			cfg.DB.DBHost,
+			cfg.DB.DBPort,
+			cfg.DB.UserName,
+			cfg.DB.Password,
+			cfg.DB.DBName,
+		),
+	)
+	if err != nil {
+		panic(err)
+	}
 
 	// TODO: add service
 
