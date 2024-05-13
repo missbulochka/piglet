@@ -22,7 +22,7 @@ service PigletTransactions {
 
 message CreateTransactionRequest {
   google.protobuf.Timestamp date = 1;
-  int32 trans_type = 2;
+  int32 transType = 2;
   float sum = 3;
   string comment = 4;
   string idCategory = 5;
@@ -84,7 +84,7 @@ message CategoryResponse {
 message Transaction {
   string id = 1;
   google.protobuf.Timestamp date = 2;
-  int32 trans_type = 3;
+  int32 transType = 3;
   float sum = 4;
   string comment = 5;
   string idCategory = 6;
