@@ -14,7 +14,7 @@ import (
 )
 
 func RunMigration(log *slog.Logger, sourceURL string, databaseURL string) error {
-	const op = "piglet-transactions | postgres.RunMigration"
+	const op = "piglet-transactions | storage.pg-migration.RunMigration"
 
 	log = log.With(slog.String("op", op))
 
