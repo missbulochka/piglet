@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log/slog"
@@ -21,4 +22,8 @@ func New(log *slog.Logger, dataSourceName string) (*Storage, error) {
 	log.Info("successfully connected to psql")
 
 	return &Storage{db: db}, nil
+}
+
+func (s *Storage) SaveTransaction(ctx context.Context) {
+	fmt.Println("saving")
 }

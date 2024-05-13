@@ -6,6 +6,8 @@ import (
 	"net"
 
 	"google.golang.org/grpc"
+
+	transactionsgrpc "piglet-transactions-service/internal/grpc/transactions"
 )
 
 type App struct {
@@ -17,12 +19,13 @@ type App struct {
 
 func New(
 	log *slog.Logger,
+	transsactionsService transactionsgrpc.Transactions,
 	server string,
 	port string,
 ) *App {
 	gRPCServer := grpc.NewServer()
 
-	// TODO: register service
+	transactionsgrpc.Register(gRPCServer, transsactionsService)
 
 	return &App{
 		log:        log,

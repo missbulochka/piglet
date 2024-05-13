@@ -6,6 +6,7 @@ import (
 
 	grpcapp "piglet-transactions-service/internal/app/grpc"
 	"piglet-transactions-service/internal/config"
+	"piglet-transactions-service/internal/services/transactions"
 	migrator "piglet-transactions-service/storage/pg-migration"
 	psql "piglet-transactions-service/storage/postgres"
 )
@@ -43,9 +44,9 @@ func New(log *slog.Logger, cfg *config.Config) *App {
 		panic(err)
 	}
 
-	// TODO: add service
+	transService := transactions.New(log, storage)
 
-	grpcApp := grpcapp.New(log, cfg.GRPC.GRPCServer, cfg.GRPC.GRPCPort)
+	grpcApp := grpcapp.New(log, transService, cfg.GRPC.GRPCServer, cfg.GRPC.GRPCPort)
 
 	return &App{
 		GRPCSrv: grpcApp,
