@@ -9,8 +9,10 @@ type Config struct {
 }
 
 type GRPCConfig struct {
-	GRPCServer string `envconfig:"PIGLET_TRANSACTIONS_SERVER" default:"0.0.0.0"`
-	GRPCPort   string `envconfig:"PIGLET_TRANSACTIONS_PORT" default:"8080"`
+	GRPCServer         string `envconfig:"PIGLET_TRANSACTIONS_SERVER" default:"0.0.0.0"`
+	GRPCPort           string `envconfig:"PIGLET_TRANSACTIONS_PORT" default:"8080"`
+	GRPCBillsCliServer string `envconfig:"PIGLET_BILLS_SERVER" default:"piglet-bills"`
+	GRPCBillsCliPort   string `envconfig:"PIGLET_BILLS_PORT" default:"8080"`
 }
 
 type DataBaseConfig struct {
