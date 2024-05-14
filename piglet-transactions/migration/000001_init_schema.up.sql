@@ -40,12 +40,12 @@ CREATE TABLE "transfer" (
 CREATE TABLE "categories" (
     "id" uuid PRIMARY KEY,
     "type" bool,
-    "name" char(255) UNIQUE NOT NULL,
+    "name" char(255) NOT NULL,
     "mandatory" bool
 );
 
-INSERT INTO categories (id, type, name, mandatory) VALUES (NULL, true, 'no category', false);
-INSERT INTO categories (id, type, name, mandatory) VALUES (NULL, true, 'no category', false);
+INSERT INTO categories (id, type, name, mandatory) VALUES ('00000000-0000-0000-0000-000000000000', true, 'no category', false);
+INSERT INTO categories (id, type, name, mandatory) VALUES ('00000000-0000-0000-0000-000000000001', false, 'no category', false);
 
 CREATE INDEX ON "transactions" ("trans_date");
 

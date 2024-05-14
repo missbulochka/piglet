@@ -12,6 +12,9 @@ import (
 	"piglet-transactions-service/internal/domain/models"
 )
 
+var noCategoryExpUUID = uuid.MustParse("00000000-0000-0000-0000-000000000000")
+var noCategoryIncUUID = uuid.MustParse("00000000-0000-0000-0000-000000000001")
+
 func TransValidator(
 	date *timestamppb.Timestamp,
 	transType int32,
@@ -146,6 +149,10 @@ func incomeValidator(
 		return fmt.Errorf("invalid income creditals: %v", codes.InvalidArgument)
 	}
 
+	if len(tr.IdCategory) == 0 {
+		trans.IdCategory = noCategoryIncUUID
+	}
+
 	// HACK: обработка ошибок
 	trans.IdCategory, _ = uuid.Parse(tr.IdCategory)
 	trans.IdBillTo, _ = uuid.Parse(tr.IdBillTo)
@@ -162,6 +169,10 @@ func expenseValidator(
 ) error {
 	if err := val.Struct(tr); err != nil {
 		return fmt.Errorf("invalid expense creditals: %v", codes.InvalidArgument)
+	}
+
+	if len(tr.IdCategory) == 0 {
+		trans.IdCategory = noCategoryExpUUID
 	}
 
 	// HACK: обработка ошибок
