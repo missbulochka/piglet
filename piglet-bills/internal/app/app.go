@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"log/slog"
 
-	"piglet-bills-service/internal/services/accounting"
-	"piglet-bills-service/internal/storage/psql"
-
 	grpcapp "piglet-bills-service/internal/app/grpc"
 	"piglet-bills-service/internal/config"
+	"piglet-bills-service/internal/services/accounting"
 	pgmigration "piglet-bills-service/internal/storage/pg-migration"
+	"piglet-bills-service/internal/storage/psql"
 )
 
 type App struct {

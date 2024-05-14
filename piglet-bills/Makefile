@@ -1,7 +1,3 @@
-# Generate Client and Server code using proto file
-generate-bills-pb:
-	./scripts/gen_grpc.sh
-
 # Up devcontainer
 up-dev-bills:
 	devcontainer up --workspace-folder .
