@@ -5,7 +5,7 @@ import (
 	"google.golang.org/grpc"
 	"piglet-transactions-service/internal/domain/models"
 
-	transv1 "piglet-transactions-service/api/proto/gen"
+	transv1 "github.com/missbulochka/protos/gen/piglet-transactions"
 )
 
 type serverAPI struct {

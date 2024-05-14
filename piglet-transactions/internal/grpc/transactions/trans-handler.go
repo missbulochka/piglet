@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	transv1 "piglet-transactions-service/api/proto/gen"
+	transv1 "github.com/missbulochka/protos/gen/piglet-transactions"
 	validation "piglet-transactions-service/internal/domain/validator"
 )
 

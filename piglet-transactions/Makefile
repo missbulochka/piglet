@@ -1,7 +1,3 @@
-# Generate Client and Server code using proto file
-generate-trans-pb:
-	./scripts/gen_grpc.sh
-
 # Up devcontainer
 up-dev-trans:
 	devcontainer up --workspace-folder .
