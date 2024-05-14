@@ -27,8 +27,8 @@ type CategoryProvider interface {
 // New returns a new intarface of the Transactions service
 func New(log *slog.Logger, transSaver TransactionSaver, categoryProvider CategoryProvider) *Transactions {
 	return &Transactions{
-		log:        log,
-		transSaver: transSaver,
+		log:              log,
+		transSaver:       transSaver,
 		categoryProvider: categoryProvider,
 	}
 }
@@ -44,18 +44,22 @@ func (t *Transactions) CreateTransaction(
 
 	trans.Id = uuid.New()
 
-	if trans.Id != uuid.Nil {
+	if trans.TransType == 1 || trans.TransType == 2 {
+		log.Info("verifying category")
 		if _, err = t.categoryProvider.GetCategory(ctx, trans.IdCategory); err != nil {
+			log.Error("failed to verify category", err)
+
 			return fmt.Errorf("%s: %w", op, err)
 		}
-	} else {
-		trans.Id = uuid.Nil
 	}
 
 	log.Info("Saving transaction")
 
 	if err = t.transSaver.SaveTransaction(ctx, *trans); err != nil {
-		//TODO: проверка на ошибку "счет не существует"
+		//TODO: проверка на ошибку "счет не существует
+		log.Error("failed to save transaction", err)
+
+		return err
 	}
 
 	log.Info("Transaction saved")
