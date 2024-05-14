@@ -8,11 +8,18 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func ClientConnect(
+type Client struct {
+	log    *slog.Logger
+	Conn   *grpc.ClientConn
+	Server string
+	Port   string
+}
+
+func NewClientConnect(
 	log *slog.Logger,
 	server string,
 	port string,
-) (*grpc.ClientConn, error) {
+) (*Client, error) {
 	const op = "piglet-transactions | grpcapp.ClientConnect()"
 
 	log = log.With(
@@ -31,5 +38,17 @@ func ClientConnect(
 
 	log.Info("grpc connection for piglet-bills client is ready")
 
-	return conn, nil
+	return &Client{
+		log:    log,
+		Conn:   conn,
+		Server: server,
+		Port:   port,
+	}, nil
+}
+
+func (cli *Client) ConnClose() {
+	err := cli.Conn.Close()
+	if err != nil {
+		cli.log.Info("wrong connection closing")
+	}
 }
