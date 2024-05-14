@@ -22,13 +22,13 @@ run-dev-trans:
 # Migrate up
 up-migrate-trans:
 	migrate -path migration \
-		-database "postgresql://postgres:pass1234@transactions-psql:5432/Accounting?sslmode=disable" \
+		-database "postgresql://postgres:pass1234@127.0.0.1:5432/Transactions?sslmode=disable" \
 		-verbose \
 		up
 
 # Migrate down
 down-migrate-trans:
 	migrate -path migration \
-	-database "postgresql://postgres:pass1234@transactions-psql:5432/Accounting?sslmode=disable" \
+	-database "postgresql://postgres:pass1234@127.0.0.1:5432/Transactions?sslmode=disable" \
 	-verbose \
 	down
