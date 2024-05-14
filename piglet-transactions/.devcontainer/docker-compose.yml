@@ -5,7 +5,7 @@ services:
     image: "postgres:16.2"
     container_name: transactions-psql
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:5433:5432"
     env_file:
       - ../pg-db.env
     volumes:
@@ -40,7 +40,7 @@ services:
     image: "postgres:16.2"
     container_name: bills-psql
     ports:
-      - "127.0.0.1:5433:5432"
+      - "127.0.0.1:5432:5432"
     env_file:
       - ../../piglet-bills/pg-db.env
     volumes:
