@@ -45,7 +45,7 @@ func (s *serverAPI) CreateTransaction(
 	}
 	fmt.Println("bill verified")
 
-	if trans, err = s.transactions.CreateTransaction(ctx, trans); err != nil {
+	if err = s.transactions.CreateTransaction(ctx, &trans); err != nil {
 		// TODO: проверка ошибки о несуществовании счета или категории
 
 		return nil, status.Errorf(codes.Internal, "internal error")

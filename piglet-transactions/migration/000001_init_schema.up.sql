@@ -44,6 +44,9 @@ CREATE TABLE "categories" (
     "mandatory" bool
 );
 
+INSERT INTO categories (id, type, name, mandatory) VALUES (NULL, true, 'no category', false);
+INSERT INTO categories (id, type, name, mandatory) VALUES (NULL, true, 'no category', false);
+
 CREATE INDEX ON "transactions" ("trans_date");
 
 CREATE INDEX ON "transactions" ("type");

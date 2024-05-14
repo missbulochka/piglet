@@ -16,7 +16,7 @@ type serverAPI struct {
 }
 
 type Transactions interface {
-	CreateTransaction(ctx context.Context, trans models.Transaction) (savedTrans models.Transaction, err error)
+	CreateTransaction(ctx context.Context, trans *models.Transaction) (err error)
 }
 
 func Register(gRPCServer *grpc.Server, conn *grpc.ClientConn, transactions Transactions) {
