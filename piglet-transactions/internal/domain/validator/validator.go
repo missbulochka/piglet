@@ -15,6 +15,11 @@ import (
 var noCategoryExpUUID = uuid.MustParse("00000000-0000-0000-0000-000000000000")
 var noCategoryIncUUID = uuid.MustParse("00000000-0000-0000-0000-000000000001")
 
+const (
+	debtTypeImCreditor = true
+	debtTypeImDebtor   = false
+)
+
 func TransValidator(
 	id string,
 	date *timestamppb.Timestamp,
@@ -203,7 +208,8 @@ func debtValidator(
 		return fmt.Errorf("invalid debt creditals: %v", codes.InvalidArgument)
 	}
 
-	if len(tr.IdBillFrom) == 0 && len(tr.IdBillTo) == 0 {
+	if (tr.DebtType == debtTypeImCreditor && len(tr.IdBillFrom) == 0) ||
+		(tr.DebtType == debtTypeImDebtor && len(tr.IdBillTo) == 0) {
 		return fmt.Errorf("invalid bills creditals: %v", codes.InvalidArgument)
 	}
 

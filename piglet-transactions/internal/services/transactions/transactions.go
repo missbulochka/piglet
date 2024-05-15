@@ -10,7 +10,15 @@ import (
 	"piglet-transactions-service/internal/domain/models"
 )
 
-const transactionsCount = 20
+const (
+	transactionsCount   = 20
+	categoryTypeExpense = true
+	categoryTypeIncome  = false
+	transTypeIncome     = 1
+	transTypeExpense    = 2
+	transTypeDebt       = 3
+	transTypeTransfer   = 4
+)
 
 // CreateTransaction create new transaction in the system and returns it
 // If bill or category with given names don't exist, returns error
@@ -23,13 +31,22 @@ func (t *Transactions) CreateTransaction(
 
 	trans.Id = uuid.New()
 
-	if trans.TransType == 1 || trans.TransType == 2 {
+	if trans.TransType == transTypeIncome || trans.TransType == transTypeExpense {
 		log.Info("verifying category")
-		if _, err = t.categoryProvider.GetCategory(ctx, trans.IdCategory); err != nil {
+		cat, err := t.categoryProvider.GetCategory(ctx, trans.IdCategory)
+		if err != nil {
 			log.Error("failed to verify category", err)
 
 			return fmt.Errorf("%s: %w", op, err)
 		}
+
+		if !((trans.TransType == transTypeIncome && cat.CategoryType == categoryTypeIncome) ||
+			(trans.TransType == transTypeExpense && cat.CategoryType == categoryTypeExpense)) {
+			log.Error("failed to verify category: inconsistency transaction and category types")
+
+			return fmt.Errorf("%s: inconsistency transaction and category types", op)
+		}
+
 	}
 
 	log.Info("saving transaction")
