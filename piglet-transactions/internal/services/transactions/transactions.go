@@ -31,6 +31,7 @@ func (t *Transactions) CreateTransaction(
 
 	trans.Id = uuid.New()
 
+	// HACK: может быть имеет смысл вынести в отдельную функцию
 	if trans.TransType == transTypeIncome || trans.TransType == transTypeExpense {
 		log.Info("verifying category")
 		cat, err := t.categoryProvider.GetCategory(ctx, trans.IdCategory)
@@ -58,6 +59,44 @@ func (t *Transactions) CreateTransaction(
 	}
 
 	log.Info("transaction saved")
+
+	return nil
+}
+
+// UpdateTransaction update exist transaction in the system and returns it
+// If transaction with given id doesn't exist, returns error
+func (t *Transactions) UpdateTransaction(ctx context.Context, trans *models.Transaction) (err error) {
+	const op = "pigletTransactions | transactions.UpdateTransaction"
+	log := t.log.With(slog.String("op", op))
+
+	// HACK: может быть имеет смысл вынести в отдельную функцию
+	if trans.TransType == transTypeIncome || trans.TransType == transTypeExpense {
+		log.Info("verifying category")
+		cat, err := t.categoryProvider.GetCategory(ctx, trans.IdCategory)
+		if err != nil {
+			log.Error("failed to verify category", err)
+
+			return fmt.Errorf("%s: %w", op, err)
+		}
+
+		if !((trans.TransType == transTypeIncome && cat.CategoryType == categoryTypeIncome) ||
+			(trans.TransType == transTypeExpense && cat.CategoryType == categoryTypeExpense)) {
+			log.Error("failed to verify category: inconsistency transaction and category types")
+
+			return fmt.Errorf("%s: inconsistency transaction and category types", op)
+		}
+
+	}
+
+	log.Info("updating category")
+
+	if err = t.transSaver.UpdateTransaction(ctx, *trans); err != nil {
+		log.Error("failed to update bill", err)
+
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("category updated")
 
 	return nil
 }

@@ -21,6 +21,7 @@ type Transactions struct {
 
 type TransactionSaver interface {
 	SaveTransaction(ctx context.Context, trans models.Transaction) (err error)
+	UpdateTransaction(ctx context.Context, trans models.Transaction) (err error)
 	DeleteTransaction(ctx context.Context, id uuid.UUID, transType uint8) (err error)
 }
 
