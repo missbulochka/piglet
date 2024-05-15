@@ -105,11 +105,16 @@ func TransValidator(
 }
 
 func CategoryValidator(
+	id string,
 	categoryType bool,
 	name string,
 	mandatory bool,
 ) (category models.Category, err error) {
 	val := validator.New(validator.WithRequiredStructEnabled())
+
+	if len(id) != 0 {
+		category.Id = uuid.MustParse(id)
+	}
 
 	if err = val.Struct(
 		&ValCategory{
