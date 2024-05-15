@@ -86,6 +86,8 @@ func (t *Transactions) CreateTransaction(
 	return nil
 }
 
+// DeleteTransaction delete transaction in the system
+// If transaction with given id doesn't exist, returns error
 func (t *Transactions) DeleteTransaction(ctx context.Context, id uuid.UUID) error {
 	const op = "pigletTransactions | transactions.DeleteTransaction"
 	log := t.log.With(slog.String("op", op))
