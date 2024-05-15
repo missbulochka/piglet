@@ -23,6 +23,20 @@ const (
 )
 
 const (
+	GetOneTransaction = `SELECT trans_date, type, sum, comment
+			FROM transactions
+			WHERE id = $1`
+)
+
+const (
+	DeleteTransaction = `DELETE FROM transactions WHERE id = $1`
+	DeleteIncome      = `DELETE FROM income WHERE trans_id = $1`
+	DeleteExpenses    = `DELETE FROM expense WHERE trans_id = $1`
+	DeleteDebt        = `DELETE FROM debt WHERE trans_id = $1`
+	DeleteTransfer    = `DELETE FROM transfer WHERE trans_id = $1`
+)
+
+const (
 	GetCategory = `SELECT id, type, name, mandatory
 		FROM categories WHERE id = $1`
 )

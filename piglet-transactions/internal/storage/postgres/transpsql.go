@@ -2,7 +2,10 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+
+	"github.com/google/uuid"
 
 	"piglet-transactions-service/internal/domain/models"
 	"piglet-transactions-service/internal/storage"
@@ -76,6 +79,37 @@ func (s *Storage) SaveTransaction(
 	}
 
 	fmt.Println("Inserted")
+
+	return nil
+}
+
+func (s *Storage) DeleteTransaction(ctx context.Context, id uuid.UUID, transType uint8) (err error) {
+	const op = "piglet-transactions | storage.postgres.DeleteTransaction"
+
+	var row *sql.Row
+
+	switch transType {
+	case 1:
+		row = s.db.QueryRowContext(ctx, storage.DeleteIncome, id)
+	case 2:
+		row = s.db.QueryRowContext(ctx, storage.DeleteExpenses, id)
+	case 3:
+		row = s.db.QueryRowContext(ctx, storage.DeleteDebt, id)
+	case 4:
+		row = s.db.QueryRowContext(ctx, storage.DeleteTransfer, id)
+	default:
+		return fmt.Errorf("%s: %w", op, row.Err())
+	}
+
+	if row.Err() != nil {
+		return fmt.Errorf("%s: %w", op, row.Err())
+	}
+
+	row = s.db.QueryRowContext(ctx, storage.DeleteTransaction, id)
+
+	if row.Err() != nil {
+		return fmt.Errorf("%s: %w", op, row.Err())
+	}
 
 	return nil
 }
