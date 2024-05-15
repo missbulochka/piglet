@@ -91,5 +91,18 @@ func (t *Transactions) GetCategory(ctx context.Context, id uuid.UUID) (cat model
 // GetAllCategories search all categories in the system
 // If something go wrong, returns error
 func (t *Transactions) GetAllCategories(ctx context.Context) (cat []*models.Category, err error) {
-	panic("implement me")
+	const op = "pigletTransactions | transactions.GetAllCategories"
+	log := t.log.With(slog.String("op", op))
+
+	log.Info("receiving categories")
+
+	if err = t.categoryProvider.GetAllCategories(ctx, &cat); err != nil {
+		log.Error("failed to get transactions", err)
+
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("categories received")
+
+	return cat, nil
 }
