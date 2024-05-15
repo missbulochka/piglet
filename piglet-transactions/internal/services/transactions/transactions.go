@@ -72,7 +72,7 @@ func (t *Transactions) DeleteTransaction(ctx context.Context, id uuid.UUID) erro
 // GetTransaction search transaction in the system
 // If transaction with given id doesn't exist, returns error
 func (t *Transactions) GetTransaction(ctx context.Context, id uuid.UUID) (trans models.Transaction, err error) {
-	const op = "pigletTransactions | transactions.DeleteTransaction"
+	const op = "pigletTransactions | transactions.GetTransaction"
 	log := t.log.With(slog.String("op", op))
 
 	trans.Date, trans.TransType, trans.Sum, trans.Comment, err = t.transProvider.DefaultTransInfo(ctx, id)
