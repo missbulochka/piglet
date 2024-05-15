@@ -20,6 +20,7 @@ type serverAPI struct {
 
 type Transactions interface {
 	CreateTransaction(ctx context.Context, trans *models.Transaction) (err error)
+	UpdateTransaction(ctx context.Context, trans *models.Transaction) (err error)
 	DeleteTransaction(ctx context.Context, id uuid.UUID) (err error)
 	GetTransaction(ctx context.Context, id uuid.UUID) (trans models.Transaction, err error)
 	GetLast20Transactions(ctx context.Context) (trans []*models.Transaction, err error)

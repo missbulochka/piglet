@@ -83,7 +83,59 @@ func (s *serverAPI) UpdateTransaction(
 	ctx context.Context,
 	req *transv1.Transaction,
 ) (*transv1.TransactionResponse, error) {
-	panic("waiting implementing")
+	trans, err := validation.TransValidator(
+		req.GetId(),
+		req.GetDate(),
+		req.GetTransType(),
+		req.GetSum(),
+		req.GetComment(),
+		req.GetIdCategory(),
+		req.GetDebtType(),
+		req.GetIdBillTo(),
+		req.GetIdBillFrom(),
+		req.GetPerson(),
+		req.GetRepeat(),
+	)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid creditals")
+	}
+
+	if err = VerifyBills(ctx, s.billsCli, &trans); err != nil {
+		return nil, err
+	}
+	fmt.Println("bill verified")
+
+	if err = s.transactions.UpdateTransaction(ctx, &trans); err != nil {
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+
+	BillFixer(
+		trans.IdBillTo.String(),
+		trans.IdBillFrom.String(),
+		trans.TransType,
+		trans.DebtType,
+		trans.Sum,
+		s.billsCli,
+	)
+
+	// HACK: обработка ошибки
+	sumFoProto, _ := trans.Sum.Float64()
+
+	return &transv1.TransactionResponse{
+		Transaction: &transv1.Transaction{
+			Id:         trans.Id.String(),
+			Date:       timestamppb.New(trans.Date),
+			TransType:  int32(trans.TransType),
+			Sum:        float32(sumFoProto),
+			Comment:    trans.Comment,
+			IdCategory: trans.Comment,
+			DebtType:   trans.DebtType,
+			IdBillTo:   trans.IdBillTo.String(),
+			IdBillFrom: trans.IdBillFrom.String(),
+			Person:     trans.Person,
+			Repeat:     trans.Repeat,
+		},
+	}, nil
 }
 
 func (s *serverAPI) DeleteTransaction(
@@ -106,6 +158,7 @@ func (s *serverAPI) DeleteTransaction(
 		return &transv1.SuccessResponse{Success: false}, status.Errorf(codes.Internal, "internal error")
 	}
 
+	// reverse the sum
 	trans.Sum = trans.Sum.Neg()
 	BillFixer(
 		trans.IdBillTo.String(),
