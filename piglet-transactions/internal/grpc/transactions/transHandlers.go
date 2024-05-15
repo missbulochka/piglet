@@ -81,7 +81,7 @@ func (s *serverAPI) CreateTransaction(
 
 func (s *serverAPI) UpdateTransaction(
 	ctx context.Context,
-	req *transv1.UpdateTransactionRequest,
+	req *transv1.Transaction,
 ) (*transv1.TransactionResponse, error) {
 	panic("waiting implementing")
 }
