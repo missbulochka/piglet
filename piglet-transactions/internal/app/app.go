@@ -45,7 +45,7 @@ func New(log *slog.Logger, cfg *config.Config) *App {
 		panic(err)
 	}
 
-	transService := transactions.New(log, storage, storage)
+	transService := transactions.New(log, storage, storage, storage)
 
 	grpcBillsCli, err := grpcapp.NewClientConnect(log, cfg.GRPC.GRPCBillsCliServer, cfg.GRPC.GRPCBillsCliPort)
 	if err != nil {

@@ -2,11 +2,13 @@ package transactionsgrpc
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 	"google.golang.org/grpc"
-	"piglet-transactions-service/internal/domain/models"
 
 	billsv1 "github.com/missbulochka/protos/gen/piglet-bills"
 	transv1 "github.com/missbulochka/protos/gen/piglet-transactions"
+	"piglet-transactions-service/internal/domain/models"
 )
 
 type serverAPI struct {
@@ -17,6 +19,7 @@ type serverAPI struct {
 
 type Transactions interface {
 	CreateTransaction(ctx context.Context, trans *models.Transaction) (err error)
+	DeleteTransaction(ctx context.Context, id uuid.UUID) (err error)
 }
 
 func Register(gRPCServer *grpc.Server, conn *grpc.ClientConn, transactions Transactions) {
