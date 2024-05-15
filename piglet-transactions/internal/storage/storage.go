@@ -38,6 +38,10 @@ const (
 	GetOneTransfer = `SELECT id_bill_from, id_bill_to
 			FROM transfer
 			WHERE trans_id = $1`
+	GetSomeTransactions = `SELECT id, trans_date, type, sum, comment
+			FROM "transactions"
+			ORDER BY "trans_date" DESC
+			LIMIT $1`
 )
 
 const (

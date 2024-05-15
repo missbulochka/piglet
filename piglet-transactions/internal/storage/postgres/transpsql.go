@@ -157,7 +157,44 @@ func (s *Storage) GetTransaction(
 	}
 
 	if err != nil {
-		return fmt.Errorf("%s: unknown error", op)
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	return nil
+}
+
+func (s *Storage) GetSomeTransactions(
+	ctx context.Context,
+	trans *[]*models.Transaction,
+	count uint8) (err error) {
+	const op = "piglet-transactions | storage.postgres.GetSomeTransactions"
+
+	rows, err := s.db.QueryContext(ctx, storage.GetSomeTransactions, count)
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	defer func() {
+		if err = rows.Close(); err != nil {
+			fmt.Printf("%s: %v", op, err)
+		}
+		if err = rows.Err(); err != nil {
+			fmt.Printf("%s: %v", op, err)
+		}
+	}()
+
+	for rows.Next() {
+		var tr models.Transaction
+		if err = rows.Scan(
+			&tr.Id,
+			&tr.Date,
+			&tr.TransType,
+			&tr.Sum,
+			&tr.Comment,
+		); err != nil {
+			return fmt.Errorf("%s: %w", op, err)
+		}
+		*trans = append(*trans, &tr)
 	}
 
 	return nil
