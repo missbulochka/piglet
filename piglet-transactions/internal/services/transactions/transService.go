@@ -31,6 +31,10 @@ type TransactionProvider interface {
 		comment string,
 		err error)
 	GetTransaction(ctx context.Context, id uuid.UUID, trans *models.Transaction) (err error)
+	GetSomeTransactions(
+		ctx context.Context,
+		trans *[]*models.Transaction,
+		count uint8) (err error)
 }
 
 type CategoryProvider interface {

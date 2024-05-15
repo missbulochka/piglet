@@ -10,6 +10,8 @@ import (
 	"piglet-transactions-service/internal/domain/models"
 )
 
+const transactionsCount = 20
+
 // CreateTransaction create new transaction in the system and returns it
 // If bill or category with given names don't exist, returns error
 func (t *Transactions) CreateTransaction(
@@ -93,6 +95,33 @@ func (t *Transactions) GetTransaction(ctx context.Context, id uuid.UUID) (trans 
 	trans.Id = id
 
 	log.Info("transaction received")
+
+	return trans, nil
+}
+
+// GetLast20Transactions search last 20 transactions in the system
+// If something go wrong, returns error
+func (t *Transactions) GetLast20Transactions(ctx context.Context) (trans []*models.Transaction, err error) {
+	const op = "pigletTransactions | transactions.GetLast20Transactions"
+	log := t.log.With(slog.String("op", op))
+
+	log.Info("receiving transactions")
+
+	if err = t.transProvider.GetSomeTransactions(ctx, &trans, transactionsCount); err != nil {
+		log.Error("failed to get transactions", err)
+
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	for i := 0; i < len(trans); i++ {
+		if err = t.transProvider.GetTransaction(ctx, trans[i].Id, trans[i]); err != nil {
+			log.Error("failed to get transaction", err)
+
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
+	}
+
+	log.Info("transactions received")
 
 	return trans, nil
 }
