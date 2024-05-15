@@ -53,6 +53,9 @@ const (
 )
 
 const (
+	InsertCategory = `INSERT INTO categories 
+    	(id, type, name, mandatory)
+    	VALUES ($1, $2, $3, $4)`
 	GetCategory = `SELECT id, type, name, mandatory
 		FROM categories WHERE id = $1`
 

@@ -12,7 +12,22 @@ import (
 // CreateCategory create new category in the system and returns it
 // If category with given names don't exist, returns error
 func (t *Transactions) CreateCategory(ctx context.Context, cat *models.Category) (err error) {
-	panic("implement me")
+	const op = "pigletTransactions | transactions.CreateCategory"
+	log := t.log.With(slog.String("op", op))
+
+	cat.Id = uuid.New()
+
+	log.Info("saving category")
+
+	if err = t.categorySaver.SaveCategory(ctx, *cat); err != nil {
+		log.Error("failed to save transaction", err)
+
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("category saved")
+
+	return nil
 }
 
 // UpdateCategory update exist category in the system and returns it
