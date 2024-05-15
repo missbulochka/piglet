@@ -2,6 +2,7 @@ package validation
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -18,6 +19,10 @@ var noCategoryIncUUID = uuid.MustParse("00000000-0000-0000-0000-000000000001")
 const (
 	debtTypeImCreditor = true
 	debtTypeImDebtor   = false
+	transTypeIncome    = 1
+	transTypeExpense   = 2
+	transTypeDebt      = 3
+	transTypeTransfer  = 4
 )
 
 func TransValidator(
@@ -52,7 +57,7 @@ func TransValidator(
 	}
 
 	switch transType {
-	case 1:
+	case transTypeIncome:
 		if err = incomeValidator(
 			val,
 			ValIncome{
@@ -65,7 +70,7 @@ func TransValidator(
 		); err != nil {
 			return trans, err
 		}
-	case 2:
+	case transTypeExpense:
 		if err = expenseValidator(
 			val,
 			ValExpense{
@@ -78,7 +83,7 @@ func TransValidator(
 		); err != nil {
 			return trans, err
 		}
-	case 3:
+	case transTypeDebt:
 		if err = debtValidator(
 			val,
 			ValDebt{
@@ -91,7 +96,7 @@ func TransValidator(
 		); err != nil {
 			return trans, err
 		}
-	case 4:
+	case transTypeTransfer:
 		if err = transferValidator(
 			val,
 			ValTransfer{
@@ -147,7 +152,17 @@ func simpleVal(
 		return fmt.Errorf("invalid transaction creditals: %v", codes.InvalidArgument)
 	}
 
-	trans.Date = tr.Date.AsTime()
+	var date time.Time
+	if tr.Date == nil {
+		date = time.Now()
+	} else {
+		if err := tr.Date.CheckValid(); err != nil {
+			return fmt.Errorf("invalid transaction creditals: %v", codes.InvalidArgument)
+		}
+		date = tr.Date.AsTime()
+	}
+
+	trans.Date = date
 	trans.TransType = uint8(tr.TransType)
 	trans.Sum = decimal.NewFromFloat32(tr.Sum)
 	trans.Comment = tr.Comment
@@ -166,11 +181,11 @@ func incomeValidator(
 
 	if len(tr.IdCategory) == 0 {
 		trans.IdCategory = noCategoryIncUUID
+	} else {
+		trans.IdCategory = uuid.MustParse(tr.IdCategory)
 	}
-
 	// HACK: обработка ошибок
-	trans.IdCategory, _ = uuid.Parse(tr.IdCategory)
-	trans.IdBillTo, _ = uuid.Parse(tr.IdBillTo)
+	trans.IdBillTo = uuid.MustParse(tr.IdBillTo)
 	trans.Person = tr.Sender
 	trans.Repeat = tr.Repeat
 
