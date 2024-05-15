@@ -88,6 +88,72 @@ func (s *Storage) SaveTransaction(
 	return nil
 }
 
+func (s *Storage) UpdateTransaction(ctx context.Context, trans models.Transaction) (err error) {
+	const op = "piglet-transactions | storage.postgres.UpdateTransaction"
+
+	row := s.db.QueryRowContext(
+		ctx,
+		storage.UpdateTransaction,
+		trans.Id,
+		trans.Date,
+		trans.TransType,
+		trans.Sum,
+		trans.Comment)
+	if row.Err() != nil {
+		return fmt.Errorf("%s: %w", op, row.Err())
+	}
+
+	switch trans.TransType {
+	case transTypeIncome:
+		row = s.db.QueryRowContext(
+			ctx,
+			storage.UpdateIncome,
+			trans.Id,
+			trans.IdCategory,
+			trans.IdBillTo,
+			trans.Person,
+			trans.Repeat,
+		)
+	case transTypeExpense:
+		row = s.db.QueryRowContext(
+			ctx,
+			storage.UpdateExpense,
+			trans.Id,
+			trans.IdCategory,
+			trans.IdBillFrom,
+			trans.Person,
+			trans.Repeat,
+		)
+	case transTypeDebt:
+		row = s.db.QueryRowContext(
+			ctx,
+			storage.UpdateDebt,
+			trans.Id,
+			trans.DebtType,
+			trans.IdBillFrom,
+			trans.IdBillTo,
+			trans.Person,
+		)
+	case transTypeTransfer:
+		row = s.db.QueryRowContext(
+			ctx,
+			storage.UpdateTransfer,
+			trans.Id,
+			trans.IdBillFrom,
+			trans.IdBillTo,
+		)
+	default:
+		return fmt.Errorf("%s: unknown error", op)
+	}
+
+	if row.Err() != nil {
+		// TODO: удалить запись в таблице transactions
+		return fmt.Errorf("%s: %w", op, row.Err())
+	}
+
+	return nil
+}
+
 func (s *Storage) DeleteTransaction(ctx context.Context, id uuid.UUID, transType uint8) (err error) {
 	const op = "piglet-transactions | storage.postgres.DeleteTransaction"
 
