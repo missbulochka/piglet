@@ -56,8 +56,14 @@ const (
 	InsertCategory = `INSERT INTO categories 
     	(id, type, name, mandatory)
     	VALUES ($1, $2, $3, $4)`
+	UpdateCategory = `
+		UPDATE categories
+		SET type = $2, name = $3, mandatory = $4
+		WHERE id = $1`
 	GetCategory = `SELECT id, type, name, mandatory
 		FROM categories WHERE id = $1`
-
+	GetAllCategories = `SELECT *
+			FROM categories
+			ORDER BY id`
 	DeleteCategory = `DELETE FROM categories WHERE id = $1`
 )
