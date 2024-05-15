@@ -95,9 +95,26 @@ func (s *serverAPI) DeleteTransaction(
 		return nil, status.Errorf(codes.InvalidArgument, "invalid creditals")
 	}
 
+	trans, err := s.transactions.GetTransaction(ctx, id)
+	if err != nil {
+		// TODO: проверка ошибки о несуществовании транзакции
+
+		return &transv1.SuccessResponse{Success: false}, status.Errorf(codes.Internal, "internal error")
+	}
+
 	if err = s.transactions.DeleteTransaction(ctx, id); err != nil {
 		return &transv1.SuccessResponse{Success: false}, status.Errorf(codes.Internal, "internal error")
 	}
+
+	trans.Sum = trans.Sum.Neg()
+	BillFixer(
+		trans.IdBillTo.String(),
+		trans.IdBillFrom.String(),
+		trans.TransType,
+		trans.DebtType,
+		trans.Sum,
+		s.billsCli,
+	)
 
 	return &transv1.SuccessResponse{Success: true}, nil
 }
