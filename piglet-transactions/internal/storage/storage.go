@@ -26,6 +26,18 @@ const (
 	GetOneTransaction = `SELECT trans_date, type, sum, comment
 			FROM transactions
 			WHERE id = $1`
+	GetOneIncome = `SELECT id_category, id_bill_to, sender, repeat
+			FROM income
+			WHERE trans_id = $1`
+	GetOneExpense = `SELECT id_category, id_bill_from, recipient, repeat
+			FROM expense
+			WHERE trans_id = $1`
+	GetOneDebt = `SELECT type, id_bill_from, id_bill_to, creditor_debtor
+			FROM debt
+			WHERE trans_id = $1`
+	GetOneTransfer = `SELECT id_bill_from, id_bill_to
+			FROM transfer
+			WHERE trans_id = $1`
 )
 
 const (

@@ -101,3 +101,39 @@ func (s *serverAPI) DeleteTransaction(
 
 	return &transv1.SuccessResponse{Success: true}, nil
 }
+
+func (s *serverAPI) GetTransaction(
+	ctx context.Context,
+	req *transv1.IdRequest,
+) (*transv1.TransactionResponse, error) {
+	id, err := uuid.Parse(req.GetId())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid creditals")
+	}
+
+	trans, err := s.transactions.GetTransaction(ctx, id)
+	if err != nil {
+		// TODO: проверка ошибки о несуществовании транзакции
+
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+
+	// HACK: обработка ошибки
+	sumFoProto, _ := trans.Sum.Float64()
+
+	return &transv1.TransactionResponse{
+		Transaction: &transv1.Transaction{
+			Id:         trans.Id.String(),
+			Date:       timestamppb.New(trans.Date),
+			TransType:  int32(trans.TransType),
+			Sum:        float32(sumFoProto),
+			Comment:    trans.Comment,
+			IdCategory: trans.Comment,
+			DebtType:   trans.DebtType,
+			IdBillTo:   trans.IdBillTo.String(),
+			IdBillFrom: trans.IdBillFrom.String(),
+			Person:     trans.Person,
+			Repeat:     trans.Repeat,
+		},
+	}, nil
+}

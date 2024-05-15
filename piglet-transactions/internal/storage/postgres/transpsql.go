@@ -78,8 +78,6 @@ func (s *Storage) SaveTransaction(
 		return fmt.Errorf("%s: %w", op, row.Err())
 	}
 
-	fmt.Println("Inserted")
-
 	return nil
 }
 
@@ -98,7 +96,7 @@ func (s *Storage) DeleteTransaction(ctx context.Context, id uuid.UUID, transType
 	case 4:
 		row = s.db.QueryRowContext(ctx, storage.DeleteTransfer, id)
 	default:
-		return fmt.Errorf("%s: %w", op, row.Err())
+		return fmt.Errorf("%s: unknown error", op)
 	}
 
 	if row.Err() != nil {
@@ -109,6 +107,57 @@ func (s *Storage) DeleteTransaction(ctx context.Context, id uuid.UUID, transType
 
 	if row.Err() != nil {
 		return fmt.Errorf("%s: %w", op, row.Err())
+	}
+
+	return nil
+}
+
+func (s *Storage) GetTransaction(
+	ctx context.Context,
+	id uuid.UUID,
+	trans *models.Transaction,
+) (err error) {
+	const op = "piglet-transactions | storage.postgres.GetTransaction"
+
+	var row *sql.Row
+
+	switch trans.TransType {
+	case 1:
+		row = s.db.QueryRowContext(ctx, storage.GetOneIncome, id)
+		err = row.Scan(
+			&trans.IdCategory,
+			&trans.IdBillTo,
+			&trans.Person,
+			&trans.Repeat,
+		)
+	case 2:
+		row = s.db.QueryRowContext(ctx, storage.GetOneExpense, id)
+		err = row.Scan(
+			&trans.IdCategory,
+			&trans.IdBillFrom,
+			&trans.Person,
+			&trans.Repeat,
+		)
+	case 3:
+		row = s.db.QueryRowContext(ctx, storage.GetOneDebt, id)
+		err = row.Scan(
+			&trans.DebtType,
+			&trans.IdBillFrom,
+			&trans.IdBillTo,
+			&trans.Person,
+		)
+	case 4:
+		row = s.db.QueryRowContext(ctx, storage.GetOneTransfer, id)
+		err = row.Scan(
+			&trans.IdBillFrom,
+			&trans.IdBillTo,
+		)
+	default:
+		return fmt.Errorf("%s: unknown error", op)
+	}
+
+	if err != nil {
+		return fmt.Errorf("%s: unknown error", op)
 	}
 
 	return nil

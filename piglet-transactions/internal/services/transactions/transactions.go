@@ -31,6 +31,7 @@ type TransactionProvider interface {
 		sum decimal.Decimal,
 		comment string,
 		err error)
+	GetTransaction(ctx context.Context, id uuid.UUID, trans *models.Transaction) (err error)
 }
 
 type CategoryProvider interface {
@@ -75,10 +76,9 @@ func (t *Transactions) CreateTransaction(
 	log.Info("saving transaction")
 
 	if err = t.transSaver.SaveTransaction(ctx, *trans); err != nil {
-		//TODO: проверка на ошибку "счет не существует
 		log.Error("failed to save transaction", err)
 
-		return err
+		return fmt.Errorf("%s: %w", op, err)
 	}
 
 	log.Info("transaction saved")
@@ -96,7 +96,7 @@ func (t *Transactions) DeleteTransaction(ctx context.Context, id uuid.UUID) erro
 	if err != nil {
 		log.Error("transaction doesn't exist", err)
 
-		return err
+		return fmt.Errorf("%s: %w", op, err)
 	}
 
 	log.Info("deleting transaction")
@@ -104,10 +104,38 @@ func (t *Transactions) DeleteTransaction(ctx context.Context, id uuid.UUID) erro
 	if err = t.transSaver.DeleteTransaction(ctx, id, transType); err != nil {
 		log.Error("failed to delete transaction", err)
 
-		return err
+		return fmt.Errorf("%s: %w", op, err)
 	}
 
 	log.Info("transaction deleted")
 
 	return nil
+}
+
+// GetTransaction search transaction in the system
+// If transaction with given id doesn't exist, returns error
+func (t *Transactions) GetTransaction(ctx context.Context, id uuid.UUID) (trans models.Transaction, err error) {
+	const op = "pigletTransactions | transactions.DeleteTransaction"
+	log := t.log.With(slog.String("op", op))
+
+	trans.Date, trans.TransType, trans.Sum, trans.Comment, err = t.transProvider.DefaultTransInfo(ctx, id)
+	if err != nil {
+		log.Error("failed to search transaction", err)
+
+		return trans, fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("receiving transaction")
+
+	if err = t.transProvider.GetTransaction(ctx, id, &trans); err != nil {
+		log.Error("failed to get transaction", err)
+
+		return trans, fmt.Errorf("%s: %w", op, err)
+	}
+
+	trans.Id = id
+
+	log.Info("transaction received")
+
+	return trans, nil
 }
