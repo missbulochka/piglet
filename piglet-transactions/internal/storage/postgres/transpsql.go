@@ -11,6 +11,13 @@ import (
 	"piglet-transactions-service/internal/storage"
 )
 
+const (
+	transTypeIncome   = 1
+	transTypeExpense  = 2
+	transTypeDebt     = 3
+	transTypeTransfer = 4
+)
+
 func (s *Storage) SaveTransaction(
 	ctx context.Context,
 	trans models.Transaction,
@@ -30,7 +37,7 @@ func (s *Storage) SaveTransaction(
 	}
 
 	switch trans.TransType {
-	case 1:
+	case transTypeIncome:
 		row = s.db.QueryRowContext(
 			ctx,
 			storage.InsertIncome,
@@ -40,7 +47,7 @@ func (s *Storage) SaveTransaction(
 			trans.Person,
 			trans.Repeat,
 		)
-	case 2:
+	case transTypeExpense:
 		row = s.db.QueryRowContext(
 			ctx,
 			storage.InsertExpense,
@@ -50,7 +57,7 @@ func (s *Storage) SaveTransaction(
 			trans.Person,
 			trans.Repeat,
 		)
-	case 3:
+	case transTypeDebt:
 		row = s.db.QueryRowContext(
 			ctx,
 			storage.InsertDebt,
@@ -60,7 +67,7 @@ func (s *Storage) SaveTransaction(
 			trans.IdBillTo,
 			trans.Person,
 		)
-	case 4:
+	case transTypeTransfer:
 		row = s.db.QueryRowContext(
 			ctx,
 			storage.InsertTransfer,
@@ -87,13 +94,13 @@ func (s *Storage) DeleteTransaction(ctx context.Context, id uuid.UUID, transType
 	var row *sql.Row
 
 	switch transType {
-	case 1:
+	case transTypeIncome:
 		row = s.db.QueryRowContext(ctx, storage.DeleteIncome, id)
-	case 2:
+	case transTypeExpense:
 		row = s.db.QueryRowContext(ctx, storage.DeleteExpenses, id)
-	case 3:
+	case transTypeDebt:
 		row = s.db.QueryRowContext(ctx, storage.DeleteDebt, id)
-	case 4:
+	case transTypeTransfer:
 		row = s.db.QueryRowContext(ctx, storage.DeleteTransfer, id)
 	default:
 		return fmt.Errorf("%s: unknown error", op)
@@ -122,7 +129,7 @@ func (s *Storage) GetTransaction(
 	var row *sql.Row
 
 	switch trans.TransType {
-	case 1:
+	case transTypeIncome:
 		row = s.db.QueryRowContext(ctx, storage.GetOneIncome, id)
 		err = row.Scan(
 			&trans.IdCategory,
@@ -130,7 +137,7 @@ func (s *Storage) GetTransaction(
 			&trans.Person,
 			&trans.Repeat,
 		)
-	case 2:
+	case transTypeExpense:
 		row = s.db.QueryRowContext(ctx, storage.GetOneExpense, id)
 		err = row.Scan(
 			&trans.IdCategory,
@@ -138,7 +145,7 @@ func (s *Storage) GetTransaction(
 			&trans.Person,
 			&trans.Repeat,
 		)
-	case 3:
+	case transTypeDebt:
 		row = s.db.QueryRowContext(ctx, storage.GetOneDebt, id)
 		err = row.Scan(
 			&trans.DebtType,
@@ -146,7 +153,7 @@ func (s *Storage) GetTransaction(
 			&trans.IdBillTo,
 			&trans.Person,
 		)
-	case 4:
+	case transTypeTransfer:
 		row = s.db.QueryRowContext(ctx, storage.GetOneTransfer, id)
 		err = row.Scan(
 			&trans.IdBillFrom,
