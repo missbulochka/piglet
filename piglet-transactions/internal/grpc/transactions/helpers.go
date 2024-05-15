@@ -12,6 +12,13 @@ import (
 	"piglet-transactions-service/internal/domain/models"
 )
 
+const (
+	transTypeIncome   = 1
+	transTypeExpense  = 2
+	transTypeDebt     = 3
+	transTypeTransfer = 4
+)
+
 func BillFixer(
 	idTo string,
 	idFrom string,
@@ -24,14 +31,18 @@ func BillFixer(
 	var id string
 	var floatSum float32
 
-	if transType == 1 || (transType == 3 && debtType == debtTypeImDebtor) || transType == 4 {
+	if transType == transTypeIncome ||
+		(transType == transTypeDebt && debtType == debtTypeImDebtor) ||
+		transType == transTypeTransfer {
 		// HACK: обработка ошибок
 		float64Sum, _ := sum.Float64()
 		floatSum = float32(float64Sum)
 		id = idTo
 	}
 
-	if transType == 2 || (transType == 4 && debtType == debtTypeImCreditor) || transType == 4 {
+	if transType == transTypeExpense ||
+		(transType == transTypeDebt && debtType == debtTypeImCreditor) ||
+		transType == transTypeTransfer {
 		// HACK: обработка ошибок
 		float64Sum, _ := sum.Neg().Float64()
 		floatSum = float32(float64Sum)
@@ -78,19 +89,19 @@ func VerifyBills(
 	}
 
 	switch trans.TransType {
-	case 1:
+	case transTypeIncome:
 		if existTo.Success == true {
 			return nil
 		}
-	case 2:
+	case transTypeExpense:
 		if existFrom.Success == true {
 			return nil
 		}
-	case 3:
+	case transTypeDebt:
 		if existFrom.Success == true || existTo.Success == true {
 			return nil
 		}
-	case 4:
+	case transTypeTransfer:
 		if existTo.Success == true && existFrom.Success == true {
 			return nil
 		}
