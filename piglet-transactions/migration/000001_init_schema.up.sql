@@ -11,7 +11,7 @@ CREATE TABLE "income" (
     "trans_id" uuid NOT NULL,
     "id_category" uuid NOT NULL,
     "id_bill_to" uuid NOT NULL,
-    "sender" char(255),
+    "sender" text,
     "repeat" bool
 );
 
@@ -19,7 +19,7 @@ CREATE TABLE "expense" (
     "trans_id" uuid NOT NULL,
     "id_category" uuid NOT NULL,
     "id_bill_from" uuid NOT NULL,
-    "recipient" char(255),
+    "recipient" text,
     "repeat" bool
 );
 
@@ -28,7 +28,7 @@ CREATE TABLE "debt" (
     "type" bool,
     "id_bill_from" uuid,
     "id_bill_to" uuid,
-    "creditor_debtor" char(255) NOT NULL
+    "creditor_debtor" text NOT NULL
 );
 
 CREATE TABLE "transfer" (
@@ -40,7 +40,7 @@ CREATE TABLE "transfer" (
 CREATE TABLE "categories" (
     "id" uuid PRIMARY KEY,
     "type" bool,
-    "name" char(255) NOT NULL,
+    "name" text NOT NULL,
     "mandatory" bool
 );
 
