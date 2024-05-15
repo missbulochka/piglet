@@ -16,6 +16,7 @@ var noCategoryExpUUID = uuid.MustParse("00000000-0000-0000-0000-000000000000")
 var noCategoryIncUUID = uuid.MustParse("00000000-0000-0000-0000-000000000001")
 
 func TransValidator(
+	id string,
 	date *timestamppb.Timestamp,
 	transType int32,
 	sum float32,
@@ -28,6 +29,10 @@ func TransValidator(
 	repeat bool,
 ) (trans models.Transaction, err error) {
 	val := validator.New(validator.WithRequiredStructEnabled())
+
+	if len(id) != 0 {
+		trans.Id = uuid.MustParse(id)
+	}
 
 	if err = simpleVal(val,
 		ValTrans{
