@@ -3,8 +3,12 @@ package transactionsgrpc
 import (
 	"context"
 	"fmt"
-	billsv1 "github.com/missbulochka/protos/gen/piglet-bills"
+
 	"github.com/shopspring/decimal"
+	"google.golang.org/protobuf/types/known/timestamppb"
+
+	billsv1 "github.com/missbulochka/protos/gen/piglet-bills"
+	transv1 "github.com/missbulochka/protos/gen/piglet-transactions"
 	"piglet-transactions-service/internal/domain/models"
 )
 
@@ -93,4 +97,28 @@ func VerifyBills(
 	}
 
 	return fmt.Errorf("bill varification failed")
+}
+
+func ReturnTransactions(trans []*models.Transaction) (resTrans []*transv1.Transaction) {
+	for _, tr := range trans {
+		// HACK: обработка ошибок
+		sumFoProto, _ := tr.Sum.Float64()
+
+		node := &transv1.Transaction{
+			Id:         tr.Id.String(),
+			Date:       timestamppb.New(tr.Date),
+			TransType:  int32(tr.TransType),
+			Sum:        float32(sumFoProto),
+			Comment:    tr.Comment,
+			IdCategory: tr.Comment,
+			DebtType:   tr.DebtType,
+			IdBillTo:   tr.IdBillTo.String(),
+			IdBillFrom: tr.IdBillFrom.String(),
+			Person:     tr.Person,
+			Repeat:     tr.Repeat,
+		}
+		resTrans = append(resTrans, node)
+	}
+
+	return resTrans
 }

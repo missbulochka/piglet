@@ -137,3 +137,17 @@ func (s *serverAPI) GetTransaction(
 		},
 	}, nil
 }
+
+func (s *serverAPI) GetAllTransactions(
+	ctx context.Context,
+	req *transv1.EmptyRequest,
+) (*transv1.GetAllTransactionsResponse, error) {
+	trans, err := s.transactions.GetLast20Transactions(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+
+	resTrans := ReturnTransactions(trans)
+
+	return &transv1.GetAllTransactionsResponse{Transactions: resTrans}, nil
+}
