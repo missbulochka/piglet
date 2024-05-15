@@ -55,4 +55,6 @@ const (
 const (
 	GetCategory = `SELECT id, type, name, mandatory
 		FROM categories WHERE id = $1`
+
+	DeleteCategory = `DELETE FROM categories WHERE id = $1`
 )

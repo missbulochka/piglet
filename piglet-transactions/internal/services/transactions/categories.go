@@ -24,7 +24,20 @@ func (t *Transactions) UpdateCategory(ctx context.Context, cat *models.Category)
 // DeleteCategory delete exist category in the system
 // If category with given id doesn't exist, returns error
 func (t *Transactions) DeleteCategory(ctx context.Context, id uuid.UUID) (err error) {
-	panic("implement me")
+	const op = "pigletTransactions | transactions.DeleteCategory"
+	log := t.log.With(slog.String("op", op))
+
+	log.Info("deleting category")
+
+	if err = t.categorySaver.DeleteCategory(ctx, id); err != nil {
+		log.Error("failed to delete transaction", err)
+
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("category deleted")
+
+	return nil
 }
 
 // GetCategory return exist category in the system

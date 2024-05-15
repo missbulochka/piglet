@@ -15,6 +15,7 @@ type Transactions struct {
 	log              *slog.Logger
 	transSaver       TransactionSaver
 	transProvider    TransactionProvider
+	categorySaver    CategorySaver
 	categoryProvider CategoryProvider
 }
 
@@ -37,6 +38,10 @@ type TransactionProvider interface {
 		count uint8) (err error)
 }
 
+type CategorySaver interface {
+	DeleteCategory(ctx context.Context, id uuid.UUID) (err error)
+}
+
 type CategoryProvider interface {
 	GetCategory(ctx context.Context, id uuid.UUID) (category models.Category, err error)
 }
@@ -46,12 +51,14 @@ func New(
 	log *slog.Logger,
 	transSaver TransactionSaver,
 	transProvider TransactionProvider,
+	categorySaver CategorySaver,
 	categoryProvider CategoryProvider,
 ) *Transactions {
 	return &Transactions{
 		log:              log,
 		transSaver:       transSaver,
 		transProvider:    transProvider,
+		categorySaver:    categorySaver,
 		categoryProvider: categoryProvider,
 	}
 }

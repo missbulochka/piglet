@@ -28,3 +28,15 @@ func (s *Storage) GetCategory(
 
 	return category, nil
 }
+
+func (s *Storage) DeleteCategory(ctx context.Context, id uuid.UUID) (err error) {
+	const op = "piglet-transactions | storage.postgres.DeleteCategory"
+
+	row := s.db.QueryRowContext(ctx, storage.DeleteCategory, id)
+
+	if row.Err() != nil {
+		return fmt.Errorf("%s: %w", op, row.Err())
+	}
+
+	return nil
+}
