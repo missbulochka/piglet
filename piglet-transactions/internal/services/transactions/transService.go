@@ -45,11 +45,11 @@ type CategorySaver interface {
 }
 
 type CategoryProvider interface {
-	GetCategory(ctx context.Context, id uuid.UUID) (category models.Category, err error)
+	GetCategory(ctx context.Context, search interface{}) (category models.Category, err error)
 	GetAllCategories(ctx context.Context, cat *[]*models.Category) (err error)
 }
 
-// New returns a new intarface of the Transactions service
+// New returns a new interface of the Transactions service
 func New(
 	log *slog.Logger,
 	transSaver TransactionSaver,

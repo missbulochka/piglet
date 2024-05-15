@@ -26,7 +26,7 @@ func (s *serverAPI) AddCategory(
 	}
 
 	if err = s.categories.CreateCategory(ctx, &cat); err != nil {
-		// TODO: проверка ошибки о несуществовании счета или категории
+		// TODO: добавить проверку ошибки на существование категории
 
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
@@ -55,7 +55,7 @@ func (s *serverAPI) UpdateCategory(
 		return nil, status.Errorf(codes.InvalidArgument, "invalid creditals")
 	}
 
-	// TODO: проверка существования категории
+	// HACK: проверить существование категории и сравнить с имеющимися данными
 
 	if err = s.categories.UpdateCategory(ctx, &cat); err != nil {
 		return nil, status.Errorf(codes.Internal, "internal error")
@@ -82,7 +82,7 @@ func (s *serverAPI) GetCategory(
 
 	cat, err := s.categories.GetCategory(ctx, id)
 	if err != nil {
-		// TODO: проверка ошибки о несуществовании категории
+		// TODO: добавить проверку ошибки на существование категории
 
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}

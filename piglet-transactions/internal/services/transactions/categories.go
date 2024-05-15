@@ -11,12 +11,25 @@ import (
 )
 
 // CreateCategory create new category in the system and returns it
-// If category with given names don't exist, returns error
+// If category with given name and type exist, returns error
 func (t *Transactions) CreateCategory(ctx context.Context, cat *models.Category) (err error) {
 	const op = "pigletTransactions | transactions.CreateCategory"
 	log := t.log.With(slog.String("op", op))
 
 	cat.Id = uuid.New()
+
+	existCat, err := t.categoryProvider.GetCategory(ctx, cat.Name)
+	fmt.Println(cat)
+	fmt.Println(existCat)
+	if err == nil {
+		if cat.Name == existCat.Name && cat.CategoryType == existCat.CategoryType {
+			log.Error("failed to save transaction: category exist", err)
+
+			return fmt.Errorf("%s: category exist", op)
+		}
+	} else {
+		// HACK: проверка на внутреннюю ошибку
+	}
 
 	log.Info("saving category")
 

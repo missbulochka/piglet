@@ -61,7 +61,7 @@ const (
 		SET type = $2, name = $3, mandatory = $4
 		WHERE id = $1`
 	GetCategory = `SELECT id, type, name, mandatory
-		FROM categories WHERE id = $1`
+		FROM categories WHERE id::text = $1 or name = $1`
 	GetAllCategories = `SELECT *
 			FROM categories
 			ORDER BY id`

@@ -48,11 +48,11 @@ func (s *Storage) UpdateCategory(ctx context.Context, cat models.Category) (err 
 
 func (s *Storage) GetCategory(
 	ctx context.Context,
-	id uuid.UUID,
+	search interface{},
 ) (category models.Category, err error) {
 	const op = "piglet-transactions | storage.postgres.GetCategory"
 
-	row := s.db.QueryRowContext(ctx, storage.GetCategory, id)
+	row := s.db.QueryRowContext(ctx, storage.GetCategory, search)
 	if err = row.Scan(
 		&category.Id,
 		&category.CategoryType,
