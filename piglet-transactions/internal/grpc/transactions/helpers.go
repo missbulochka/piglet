@@ -122,3 +122,19 @@ func ReturnTransactions(trans []*models.Transaction) (resTrans []*transv1.Transa
 
 	return resTrans
 }
+
+func ReturnCategories(cat []*models.Category) (resCat []*transv1.Category) {
+	for _, c := range cat {
+		// HACK: обработка ошибок
+
+		node := &transv1.Category{
+			Id:           c.Id.String(),
+			Type:         c.CategoryType,
+			CategoryName: c.Name,
+			Mandatory:    c.Mandatory,
+		}
+		resCat = append(resCat, node)
+	}
+
+	return resCat
+}

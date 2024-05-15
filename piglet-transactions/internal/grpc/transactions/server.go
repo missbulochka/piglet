@@ -15,6 +15,7 @@ type serverAPI struct {
 	transv1.UnimplementedPigletTransactionsServer
 	billsCli     billsv1.PigletBillsClient
 	transactions Transactions
+	categories   Categories
 }
 
 type Transactions interface {
@@ -22,6 +23,14 @@ type Transactions interface {
 	DeleteTransaction(ctx context.Context, id uuid.UUID) (err error)
 	GetTransaction(ctx context.Context, id uuid.UUID) (trans models.Transaction, err error)
 	GetLast20Transactions(ctx context.Context) (trans []*models.Transaction, err error)
+}
+
+type Categories interface {
+	CreateCategory(ctx context.Context, cat *models.Category) (err error)
+	UpdateCategory(ctx context.Context, cat *models.Category) (err error)
+	DeleteCategory(ctx context.Context, id uuid.UUID) (err error)
+	GetCategory(ctx context.Context, id uuid.UUID) (cat models.Category, err error)
+	GetAllCategories(ctx context.Context) (cat []*models.Category, err error)
 }
 
 func Register(gRPCServer *grpc.Server, conn *grpc.ClientConn, transactions Transactions) {
