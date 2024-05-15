@@ -41,6 +41,7 @@ type TransactionProvider interface {
 type CategorySaver interface {
 	SaveCategory(ctx context.Context, cat models.Category) (err error)
 	DeleteCategory(ctx context.Context, id uuid.UUID) (err error)
+	UpdateCategory(ctx context.Context, cat models.Category) (err error)
 }
 
 type CategoryProvider interface {

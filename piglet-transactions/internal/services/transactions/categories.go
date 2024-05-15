@@ -33,7 +33,20 @@ func (t *Transactions) CreateCategory(ctx context.Context, cat *models.Category)
 // UpdateCategory update exist category in the system and returns it
 // If category with given id doesn't exist, returns error
 func (t *Transactions) UpdateCategory(ctx context.Context, cat *models.Category) (err error) {
-	panic("implement me")
+	const op = "pigletBills | accounting.UpdateCategory"
+	log := t.log.With(slog.String("op", op))
+
+	log.Info("updating category")
+
+	if err = t.categorySaver.UpdateCategory(ctx, *cat); err != nil {
+		log.Error("failed to update bill", err)
+
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("category updated")
+
+	return nil
 }
 
 // DeleteCategory delete exist category in the system

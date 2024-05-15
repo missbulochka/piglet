@@ -28,6 +28,24 @@ func (s *Storage) SaveCategory(ctx context.Context, cat models.Category) (err er
 	return nil
 }
 
+func (s *Storage) UpdateCategory(ctx context.Context, cat models.Category) (err error) {
+	const op = "piglet-bills | storage.psql.UpdateCategory"
+
+	row := s.db.QueryRowContext(
+		ctx,
+		storage.UpdateCategory,
+		cat.Id,
+		cat.CategoryType,
+		cat.Name,
+		cat.Mandatory,
+	)
+	if row.Err() != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	return nil
+}
+
 func (s *Storage) GetCategory(
 	ctx context.Context,
 	id uuid.UUID,
