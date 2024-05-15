@@ -55,6 +55,7 @@ func New(log *slog.Logger, cfg *config.Config) *App {
 	grpcApp := grpcapp.New(
 		log,
 		transService,
+		transService,
 		grpcBillsCli.Conn,
 		cfg.GRPC.GRPCServer,
 		cfg.GRPC.GRPCPort,

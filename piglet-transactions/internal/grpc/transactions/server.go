@@ -33,11 +33,12 @@ type Categories interface {
 	GetAllCategories(ctx context.Context) (cat []*models.Category, err error)
 }
 
-func Register(gRPCServer *grpc.Server, conn *grpc.ClientConn, transactions Transactions) {
+func Register(gRPCServer *grpc.Server, conn *grpc.ClientConn, transactions Transactions, categories Categories) {
 	transv1.RegisterPigletTransactionsServer(
 		gRPCServer,
 		&serverAPI{
 			transactions: transactions,
+			categories:   categories,
 			billsCli:     billsv1.NewPigletBillsClient(conn),
 		})
 }

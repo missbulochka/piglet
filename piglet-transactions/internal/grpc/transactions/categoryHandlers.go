@@ -2,10 +2,12 @@ package transactionsgrpc
 
 import (
 	"context"
+
 	"github.com/google/uuid"
-	transv1 "github.com/missbulochka/protos/gen/piglet-transactions"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	transv1 "github.com/missbulochka/protos/gen/piglet-transactions"
 	validation "piglet-transactions-service/internal/domain/validator"
 )
 
@@ -44,7 +46,7 @@ func (s *serverAPI) UpdateCategory(
 	req *transv1.Category,
 ) (*transv1.CategoryResponse, error) {
 	cat, err := validation.CategoryValidator(
-		"",
+		req.GetId(),
 		req.GetType(),
 		req.GetCategoryName(),
 		req.GetMandatory(),

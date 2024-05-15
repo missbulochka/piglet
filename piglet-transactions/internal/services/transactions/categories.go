@@ -3,8 +3,9 @@ package transactions
 import (
 	"context"
 	"fmt"
-	"github.com/google/uuid"
 	"log/slog"
+
+	"github.com/google/uuid"
 
 	"piglet-transactions-service/internal/domain/models"
 )
