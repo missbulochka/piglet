@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -25,6 +26,7 @@ func (s *serverAPI) CreateTransaction(
 	req *transv1.CreateTransactionRequest,
 ) (*transv1.TransactionResponse, error) {
 	trans, err := validation.TransValidator(
+		"",
 		req.GetDate(),
 		req.GetTransType(),
 		req.GetSum(),
@@ -37,7 +39,7 @@ func (s *serverAPI) CreateTransaction(
 		req.GetRepeat(),
 	)
 	if err != nil {
-		return nil, err
+		return nil, status.Errorf(codes.InvalidArgument, "invalid creditals")
 	}
 
 	if err = VerifyBills(ctx, s.billsCli, &trans); err != nil {
@@ -78,6 +80,29 @@ func (s *serverAPI) CreateTransaction(
 			Repeat:     trans.Repeat,
 		},
 	}, nil
+}
+
+func (s *serverAPI) UpdateTransaction(
+	ctx context.Context,
+	req *transv1.UpdateTransactionRequest,
+) (*transv1.TransactionResponse, error) {
+	panic("waiting implementing")
+}
+
+func (s *serverAPI) DeleteTransaction(
+	ctx context.Context,
+	req *transv1.IdRequest,
+) (*transv1.SuccessResponse, error) {
+	id, err := uuid.Parse(req.GetId())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid creditals")
+	}
+
+	if err = s.transactions.DeleteTransaction(ctx, id); err != nil {
+		return &transv1.SuccessResponse{Success: false}, status.Errorf(codes.Internal, "internal error")
+	}
+
+	return &transv1.SuccessResponse{Success: true}, nil
 }
 
 func BillFixer(
