@@ -194,6 +194,17 @@ func (s *Storage) GetTransaction(
 
 	var row *sql.Row
 
+	row = s.db.QueryRowContext(ctx, storage.GetOneTransaction, id)
+	err = row.Scan(
+		&trans.Date,
+		&trans.TransType,
+		&trans.Sum,
+		&trans.Comment,
+	)
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
 	switch trans.TransType {
 	case transTypeIncome:
 		row = s.db.QueryRowContext(ctx, storage.GetOneIncome, id)
@@ -232,6 +243,8 @@ func (s *Storage) GetTransaction(
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
+
+	trans.Id = id
 
 	return nil
 }
