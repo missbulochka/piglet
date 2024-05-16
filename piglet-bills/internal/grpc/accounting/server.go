@@ -4,11 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/shopspring/decimal"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -70,7 +68,6 @@ const (
 	goalType    = false
 )
 
-// HACK: стоит разбить на CreateAccount и CreateGoal
 func (s *serverAPI) CreateBill(
 	ctx context.Context,
 	req *billsv1.CreateBillRequest,
@@ -103,6 +100,8 @@ func (s *serverAPI) CreateBill(
 
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
+
+	syncBills(bill.ID, s.transCli, bill.BillStatus, false)
 
 	// HACK: поработать над преобразованиями и обработкой ошибок
 	currentSum, _ := bill.CurrentSum.Float64()
@@ -223,6 +222,9 @@ func (s *serverAPI) UpdateBill(
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
 
+	// HACK: проверка на изменение статуса
+	syncBills(bill.ID, s.transCli, bill.BillStatus, false)
+
 	// HACK: поработать над преобразованиями и обработкой ошибок
 	newCurrentSum, _ := bill.CurrentSum.Float64()
 	newGoalSum, _ := bill.GoalSum.Float64()
@@ -251,12 +253,22 @@ func (s *serverAPI) DeleteBill(
 		return nil, err
 	}
 
+	bill, err := s.accounting.GetBill(ctx, req.GetId())
+	if err != nil {
+		if errors.Is(err, accounting.ErrBillNotFound) {
+			return nil, status.Error(codes.InvalidArgument, "invalid uuid")
+		}
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+
 	success, err := s.accounting.DeleteBill(ctx, req.GetId())
 	if err != nil {
 		if errors.Is(err, accounting.ErrBillNotFound) {
 			return nil, status.Error(codes.InvalidArgument, "invalid uuid")
 		}
 		return nil, status.Errorf(codes.Internal, "internal error")
+	} else {
+		syncBills(bill.ID, s.transCli, bill.BillStatus, true)
 	}
 
 	return &billsv1.SuccessResponse{
@@ -281,65 +293,4 @@ func (s *serverAPI) FixBillSum(
 	}
 
 	return &emptypb.Empty{}, nil
-}
-
-func validation(
-	vd validateData,
-) error {
-	val := validator.New(validator.WithRequiredStructEnabled())
-
-	if err := val.Struct(vd); err != nil {
-		var validationErr validator.ValidationErrors
-		if errors.As(err, &validationErr) {
-			log.Println("Validation errors:")
-			for _, err := range validationErr {
-				log.Printf("- Namespace: %s, Field: %s, Tag: %s, ActualTag: %s, Value: %v, Param: %s",
-					err.Namespace(), err.Field(), err.Tag(), err.ActualTag(), err.Value(), err.Param())
-			}
-			return status.Errorf(codes.InvalidArgument, "invalid bill: %v", validationErr)
-		}
-		log.Printf("Validation error: %v", err)
-		return status.Errorf(codes.Internal, "internal error: %v", err)
-	}
-	return nil
-}
-
-func orValidation(uuid string, name string) error {
-	val := validator.New()
-
-	if err := val.Var(uuid, "required"); err != nil {
-		if err2 := val.Var(name, "required"); err2 != nil {
-			return status.Errorf(codes.InvalidArgument, err2.Error())
-		}
-	}
-
-	return nil
-}
-
-type validateData struct {
-	billType bool   `validate:"boolean"`
-	billName string `validate:"required"`
-}
-
-func billsConversion(bills []*models.Bill) []*billsv1.Bill {
-	var resBills []*billsv1.Bill
-	for _, bill := range bills {
-		currentSum, _ := bill.CurrentSum.Float64()
-		goalSum, _ := bill.GoalSum.Float64()
-		monthlyPayment := uint32(int32(bill.MonthlyPayment.IntPart()))
-
-		resBill := &billsv1.Bill{
-			Id:             bill.ID,
-			BillType:       bill.BillType,
-			BillStatus:     bill.BillStatus,
-			BillName:       bill.Name,
-			CurrentSum:     float32(currentSum),
-			GoalSum:        float32(goalSum),
-			Date:           timestamppb.New(bill.Date),
-			MonthlyPayment: monthlyPayment,
-		}
-		resBills = append(resBills, resBill)
-	}
-
-	return resBills
 }
