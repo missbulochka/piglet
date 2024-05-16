@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,7 +16,10 @@ import (
 )
 
 type Storage struct {
-	db *sql.DB
+	db            *sql.DB
+	billsMutex    sync.Mutex
+	accountsMutex sync.Mutex
+	goalsMutex    sync.Mutex
 }
 
 const (
@@ -56,6 +60,7 @@ func (s *Storage) SaveBill(
 	const op = "piglet-bills | storage.psql.SaveBill"
 
 	id := uuid.New().String()
+	s.billsMutex.Lock()
 	row := s.db.QueryRowContext(ctx, storage.CreateBill, id, billName, emptySumValue, billType)
 	err = row.Scan(
 		&bill.ID,
@@ -63,17 +68,22 @@ func (s *Storage) SaveBill(
 		&bill.CurrentSum,
 		&bill.BillType,
 	)
+	s.billsMutex.Unlock()
 	if err != nil {
 		return bill, fmt.Errorf("%s: %w", op, err)
 	}
 
 	if billType {
+		s.accountsMutex.Lock()
 		row = s.db.QueryRowContext(ctx, storage.CreateAccount, bill.ID, openAccount)
+		s.accountsMutex.Unlock()
 		err = row.Scan(
 			&bill.BillStatus,
 		)
 	} else {
+		s.goalsMutex.Lock()
 		row = s.db.QueryRowContext(ctx, storage.CreateGoals, bill.ID, goalSum, date, monthlyPayment)
+		s.goalsMutex.Unlock()
 		err = row.Scan(
 			&bill.GoalSum,
 			&bill.Date,
@@ -95,7 +105,9 @@ func (s *Storage) ReturnBill(
 	const op = "piglet-bills | storage.psql.ReturnBill"
 
 	// HACK: обработка ошибки парсинга uuid
+	s.billsMutex.Lock()
 	row := s.db.QueryRowContext(ctx, storage.GetOneBill, billId)
+	s.billsMutex.Unlock()
 	err = row.Scan(
 		&bill.ID,
 		&bill.Name,
@@ -107,10 +119,14 @@ func (s *Storage) ReturnBill(
 	}
 
 	if bill.BillType {
+		s.accountsMutex.Lock()
 		row = s.db.QueryRowContext(ctx, storage.GetOneAccount, bill.ID)
+		s.accountsMutex.Unlock()
 		err = row.Scan(&bill.BillStatus)
 	} else {
+		s.goalsMutex.Lock()
 		row = s.db.QueryRowContext(ctx, storage.GetOneGoal, bill.ID)
+		s.goalsMutex.Unlock()
 		err = row.Scan(
 			&bill.GoalSum,
 			&bill.Date,
@@ -129,7 +145,9 @@ func (s *Storage) ReturnSomeBills(ctx context.Context, billType bool) (bills []*
 	const op = "piglet-bills | storage.psql.ReturnSomeBills"
 
 	// HACK: подумать о более красивом решении
+	s.billsMutex.Lock()
 	rows, err := s.db.QueryContext(ctx, storage.GetSomeBills, billType)
+	s.billsMutex.Unlock()
 	if err != nil {
 		return nil, err
 	}
@@ -137,9 +155,13 @@ func (s *Storage) ReturnSomeBills(ctx context.Context, billType bool) (bills []*
 
 	var typedRows *sql.Rows
 	if billType {
+		s.accountsMutex.Lock()
 		typedRows, err = s.db.QueryContext(ctx, storage.GetAllAccounts)
+		s.accountsMutex.Unlock()
 	} else {
+		s.goalsMutex.Lock()
 		typedRows, err = s.db.QueryContext(ctx, storage.GetAllGoals)
+		s.goalsMutex.Unlock()
 	}
 	if err != nil {
 		return nil, err
@@ -201,6 +223,7 @@ func (s *Storage) UpdateBill(
 ) (bill models.Bill, err error) {
 	const op = "piglet-bills | storage.psql.UpdateBill"
 
+	s.billsMutex.Lock()
 	row := s.db.QueryRowContext(
 		ctx,
 		storage.UpdateBill,
@@ -208,6 +231,7 @@ func (s *Storage) UpdateBill(
 		billName,
 		currentSum,
 	)
+	s.billsMutex.Unlock()
 	err = row.Scan(
 		&bill.Name,
 		&bill.CurrentSum,
@@ -218,16 +242,19 @@ func (s *Storage) UpdateBill(
 	}
 
 	if bill.BillType {
+		s.accountsMutex.Lock()
 		row = s.db.QueryRowContext(
 			ctx,
 			storage.UpdateAccount,
 			id,
 			billStatus,
 		)
+		s.accountsMutex.Unlock()
 		err = row.Scan(
 			&bill.BillStatus,
 		)
 	} else {
+		s.goalsMutex.Lock()
 		row = s.db.QueryRowContext(
 			ctx,
 			storage.UpdateGoal,
@@ -236,6 +263,7 @@ func (s *Storage) UpdateBill(
 			date,
 			monthlyPayment,
 		)
+		s.goalsMutex.Unlock()
 		err = row.Scan(
 			&bill.GoalSum,
 			&bill.Date,
@@ -254,22 +282,30 @@ func (s *Storage) DeleteBill(ctx context.Context, id string) (err error) {
 
 	// HACK: восстановление строки в случае, если не удалось удалить записи из зависимых таблиц
 	var billType bool
+	s.billsMutex.Lock()
 	row := s.db.QueryRowContext(ctx, storage.VerifyBill, id)
+	s.billsMutex.Unlock()
 	err = row.Scan(&billType)
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
 	if billType {
-		_, err = s.db.ExecContext(ctx, storage.DeleteAccount, id)
+		s.accountsMutex.Lock()
+		row = s.db.QueryRowContext(ctx, storage.DeleteAccount, id)
+		s.accountsMutex.Unlock()
 	} else {
-		_, err = s.db.ExecContext(ctx, storage.DeleteGoal, id)
+		s.goalsMutex.Lock()
+		row = s.db.QueryRowContext(ctx, storage.DeleteGoal, id)
+		s.goalsMutex.Unlock()
 	}
-	if err != nil {
+	if row.Err() != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
+	s.billsMutex.Lock()
 	row = s.db.QueryRowContext(ctx, storage.DeleteBill, id)
+	s.billsMutex.Unlock()
 	if row.Err() != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
@@ -283,7 +319,9 @@ func (s *Storage) VerifyBill(
 ) (billType bool, err error) {
 	const op = "piglet-bills | storage.psql.VerifyBill"
 
+	s.billsMutex.Lock()
 	row := s.db.QueryRowContext(ctx, storage.VerifyBill, id)
+	s.billsMutex.Unlock()
 	err = row.Scan(&billType)
 	// HACK: в случае ошибки возвращает false (что является в БД типом goals)
 	if err != nil {
