@@ -6,6 +6,8 @@
   "service": "dev_piglet-bills",
   "runServices": [
     "bills-psql",
+    "piglet-transactions",
+    "transactions-psql"
   ],
   "forwardPorts": [
     8080,

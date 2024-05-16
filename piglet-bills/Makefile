@@ -4,7 +4,16 @@ up-dev-bills:
 
 # Down devcontainer (and dependencies)
 rm-dev-bills:
-	docker stop dev_piglet-bills bills-psql && docker rm dev_piglet-bills bills-psql
+	docker stop \
+		bills-psql \
+        dev_piglet-bills \
+		transactions-psql \
+		piglet-transactions && \
+	docker rm \
+		bills-psql \
+        dev_piglet-bills \
+		transactions-psql \
+		piglet-transactions \
 
 # Run devcontainer
 run-dev-bills:

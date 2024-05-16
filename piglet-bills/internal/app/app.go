@@ -12,7 +12,8 @@ import (
 )
 
 type App struct {
-	GRPCSrv *grpcapp.App
+	GRPCSrv  *grpcapp.App
+	TransCli *grpcapp.Client
 }
 
 func New(
@@ -49,8 +50,20 @@ func New(
 		storage,
 	)
 
-	grpcApp := grpcapp.New(log, accountingService, cfg.GRPC.GRPCServer, cfg.GRPC.GRPCPort)
+	grpcTransCli, err := grpcapp.NewClientConnect(log, cfg.GRPC.GRPCTransCliServer, cfg.GRPC.GRPCTransCliPort)
+	if err != nil {
+		panic(err)
+	}
+
+	grpcApp := grpcapp.New(
+		log,
+		accountingService,
+		grpcTransCli.Conn,
+		cfg.GRPC.GRPCServer,
+		cfg.GRPC.GRPCPort,
+	)
 	return &App{
-		GRPCSrv: grpcApp,
+		GRPCSrv:  grpcApp,
+		TransCli: grpcTransCli,
 	}
 }

@@ -38,6 +38,7 @@ func main() {
 	sign := <-stop
 	log.Info("shutting down piglet-bills service", slog.String("signal", sign.String()))
 	application.GRPCSrv.Stop()
+	application.TransCli.ConnClose()
 	log.Info("piglet-bills service stopped")
 }
 

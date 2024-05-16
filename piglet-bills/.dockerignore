@@ -3,5 +3,5 @@ bills.env
 README.md
 .devcontainer/
 docker/
-pg-storage/
+pg-storage-bills/
 scripts/

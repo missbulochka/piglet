@@ -20,12 +20,13 @@ type App struct {
 func New(
 	log *slog.Logger,
 	accountingService accountingrpc.Accounting,
+	grpcTransCli *grpc.ClientConn,
 	server string,
 	port string,
 ) *App {
 	gRPCServer := grpc.NewServer()
 
-	accountingrpc.Register(gRPCServer, accountingService)
+	accountingrpc.Register(gRPCServer, grpcTransCli, accountingService)
 
 	return &App{
 		log:        log,

@@ -17,12 +17,14 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	billsv1 "github.com/missbulochka/protos/gen/piglet-bills"
+	transv1 "github.com/missbulochka/protos/gen/piglet-transactions"
 	models "piglet-bills-service/internal/domain/model"
 	"piglet-bills-service/internal/services/accounting"
 )
 
 type serverAPI struct {
 	billsv1.UnimplementedPigletBillsServer
+	transCli   transv1.PigletTransactionsClient
 	accounting Accounting
 }
 
@@ -53,8 +55,14 @@ type Accounting interface {
 	FixBillSum(ctx context.Context, id string, sum decimal.Decimal) (err error)
 }
 
-func Register(gRPCServer *grpc.Server, accounting Accounting) {
-	billsv1.RegisterPigletBillsServer(gRPCServer, &serverAPI{accounting: accounting})
+func Register(gRPCServer *grpc.Server, conn *grpc.ClientConn, accounting Accounting) {
+	billsv1.RegisterPigletBillsServer(
+		gRPCServer,
+		&serverAPI{
+			accounting: accounting,
+			transCli:   transv1.NewPigletTransactionsClient(conn),
+		},
+	)
 }
 
 const (
@@ -249,25 +257,6 @@ func (s *serverAPI) DeleteBill(
 			return nil, status.Error(codes.InvalidArgument, "invalid uuid")
 		}
 		return nil, status.Errorf(codes.Internal, "internal error")
-	}
-
-	return &billsv1.SuccessResponse{
-		Success: success,
-	}, nil
-}
-
-func (s *serverAPI) VerifyBill(
-	ctx context.Context,
-	req *billsv1.IdRequest,
-) (*billsv1.SuccessResponse, error) {
-	// HACK: улучшить валидацию
-	if err := orValidation(req.GetId(), ""); err != nil {
-		return nil, err
-	}
-
-	success, err := s.accounting.VerifyBill(ctx, req.GetId())
-	if err != nil {
-		success = false
 	}
 
 	return &billsv1.SuccessResponse{
