@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   piglet-bills:
-    build:
-      context: .
-      dockerfile: piglet-bills/docker/piglet-bills.Dockerfile
+    image: piglet-bills:0.1.0
     container_name: piglet-bills
     ports:
       - "127.0.0.1:8080:8080"
@@ -16,17 +14,13 @@ services:
     restart: unless-stopped
 
   piglet-transactions:
-    build:
-      context: .
-      dockerfile: piglet-transactions/docker/piglet-transactions.Dockerfile
+    image: piglet-transactions:0.1.0
     container_name: piglet-transactions
     ports:
       - "127.0.0.1:8081:8081"
     depends_on:
       transactions-psql:
         condition: service_healthy
-      piglet-bills:
-        condition: service_started
     env_file:
       - piglet-transactions/transactions.env
     restart: unless-stopped
@@ -40,8 +34,11 @@ services:
       - piglet-bills/pg-db.env
     volumes:
       - pg-storage-bills:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=Transactions
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d Accounting" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -57,7 +54,7 @@ services:
     volumes:
       - pg-storage-trans:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d Transactions" ]
       interval: 5s
       timeout: 5s
       retries: 5
