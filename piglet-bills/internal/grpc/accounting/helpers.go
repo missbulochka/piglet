@@ -19,7 +19,7 @@ import (
 func syncBills(id string, cli transv1.PigletTransactionsClient, billStatus bool, del bool) {
 	go func(id string, cli transv1.PigletTransactionsClient, billStatus bool) {
 		ctx := context.Background()
-		_, err := cli.AddBill(ctx, &transv1.Bill{Id: id, BillStatus: billStatus, Deletion: del})
+		_, err := cli.UpdateBill(ctx, &transv1.Bill{Id: id, BillStatus: billStatus, Deletion: del})
 		if err != nil {
 			fmt.Println("service synchronization error: %w", err)
 		}
