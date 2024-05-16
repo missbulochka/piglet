@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -83,14 +82,11 @@ func (s *serverAPI) CreateBill(
 		return nil, err
 	}
 
-	// HACK: обработка ошибок
-	goalSum, _ := decimal.NewFromString(strconv.FormatUint(uint64(req.GetGoalSum()), 10))
-
 	bill, err := s.accounting.CreateBill(
 		ctx,
 		req.GetBillType(),
 		req.GetBillName(),
-		goalSum,
+		decimal.NewFromFloat32(req.GetGoalSum()),
 		req.GetDate().AsTime(),
 	)
 	if err != nil {
@@ -201,17 +197,13 @@ func (s *serverAPI) UpdateBill(
 		return nil, err
 	}
 
-	// HACK: обработка ошибок
-	currentSum, _ := decimal.NewFromString(strconv.FormatUint(uint64(req.GetCurrentSum()), 10))
-	goalSum, _ := decimal.NewFromString(strconv.FormatUint(uint64(req.GetGoalSum()), 10))
-
 	bill, err := s.accounting.UpdateBill(
 		ctx,
 		req.GetId(),
 		req.GetBillName(),
-		currentSum,
+		decimal.NewFromFloat32(req.GetCurrentSum()),
 		req.GetBillStatus(),
-		goalSum,
+		decimal.NewFromFloat32(req.GetGoalSum()),
 		req.GetDate().AsTime(),
 	)
 	if err != nil {
@@ -285,7 +277,8 @@ func (s *serverAPI) FixBillSum(
 		fmt.Println("invalid uuid")
 	}
 
-	sum, _ := decimal.NewFromString(strconv.FormatUint(uint64(req.GetSum()), 10))
+	sum := decimal.NewFromFloat32(req.GetSum())
+	fmt.Println(sum)
 
 	err := s.accounting.FixBillSum(ctx, req.GetId(), sum)
 	if err != nil {
