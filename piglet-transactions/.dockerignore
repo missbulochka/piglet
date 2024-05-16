@@ -2,5 +2,5 @@
 README.md
 .devcontainer/
 docker/
-pg-storage-bills/
+pg-storage-trans/
 scripts/
