@@ -93,7 +93,8 @@ func (s *serverAPI) UpdateTransaction(
 		return nil, status.Errorf(codes.InvalidArgument, "invalid creditals")
 	}
 
-	if err = s.transactions.UpdateTransaction(ctx, &trans); err != nil {
+	dif, err := s.transactions.UpdateTransaction(ctx, &trans)
+	if err != nil {
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
 
@@ -102,7 +103,7 @@ func (s *serverAPI) UpdateTransaction(
 		trans.IdBillFrom.String(),
 		trans.TransType,
 		trans.DebtType,
-		trans.Sum,
+		dif,
 		s.billsCli,
 	)
 

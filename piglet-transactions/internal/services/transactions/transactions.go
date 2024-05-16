@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 
 	"piglet-transactions-service/internal/domain/models"
 )
@@ -89,7 +90,10 @@ func (t *Transactions) CreateTransaction(
 
 // UpdateTransaction update exist transaction in the system and returns it
 // If transaction with given id doesn't exist, returns error
-func (t *Transactions) UpdateTransaction(ctx context.Context, trans *models.Transaction) (err error) {
+func (t *Transactions) UpdateTransaction(
+	ctx context.Context,
+	trans *models.Transaction,
+) (dif decimal.Decimal, err error) {
 	const op = "pigletTransactions | transactions.UpdateTransaction"
 	log := t.log.With(slog.String("op", op))
 
@@ -101,7 +105,7 @@ func (t *Transactions) UpdateTransaction(ctx context.Context, trans *models.Tran
 		if err != nil {
 			log.Error("%w", err)
 
-			return fmt.Errorf("%s: %w", op, err)
+			return decimal.Decimal{}, fmt.Errorf("%s: %w", op, err)
 		}
 	}
 	if trans.TransType == transTypeExpense ||
@@ -111,7 +115,7 @@ func (t *Transactions) UpdateTransaction(ctx context.Context, trans *models.Tran
 		if err != nil {
 			log.Error("%w", err)
 
-			return fmt.Errorf("%s: %w", op, err)
+			return decimal.Decimal{}, fmt.Errorf("%s: %w", op, err)
 		}
 	}
 
@@ -122,29 +126,37 @@ func (t *Transactions) UpdateTransaction(ctx context.Context, trans *models.Tran
 		if err != nil {
 			log.Error("failed to verify category", err)
 
-			return fmt.Errorf("%s: %w", op, err)
+			return decimal.Decimal{}, fmt.Errorf("%s: %w", op, err)
 		}
 
 		if !((trans.TransType == transTypeIncome && cat.CategoryType == categoryTypeIncome) ||
 			(trans.TransType == transTypeExpense && cat.CategoryType == categoryTypeExpense)) {
 			log.Error("failed to verify category: inconsistency transaction and category types")
 
-			return fmt.Errorf("%s: inconsistency transaction and category types", op)
+			return decimal.Decimal{}, fmt.Errorf("%s: inconsistency transaction and category types", op)
 		}
 
+	}
+
+	var oldtrans models.Transaction
+	err = t.transProvider.GetTransaction(ctx, trans.Id, &oldtrans)
+	if err != nil {
+		log.Error("failed to find transaction", err)
+
+		return decimal.Decimal{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	log.Info("updating category")
 
 	if err = t.transSaver.UpdateTransaction(ctx, *trans); err != nil {
-		log.Error("failed to update bill", err)
+		log.Error("failed to update transaction", err)
 
-		return fmt.Errorf("%s: %w", op, err)
+		return decimal.Decimal{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	log.Info("category updated")
 
-	return nil
+	return trans.Sum.Sub(oldtrans.Sum), nil
 }
 
 // DeleteTransaction delete transaction in the system

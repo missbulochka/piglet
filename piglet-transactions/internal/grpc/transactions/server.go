@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"google.golang.org/grpc"
 
 	billsv1 "github.com/missbulochka/protos/gen/piglet-bills"
@@ -21,7 +22,7 @@ type serverAPI struct {
 
 type Transactions interface {
 	CreateTransaction(ctx context.Context, trans *models.Transaction) (err error)
-	UpdateTransaction(ctx context.Context, trans *models.Transaction) (err error)
+	UpdateTransaction(ctx context.Context, trans *models.Transaction) (dif decimal.Decimal, err error)
 	DeleteTransaction(ctx context.Context, id uuid.UUID) (err error)
 	GetTransaction(ctx context.Context, id uuid.UUID) (trans models.Transaction, err error)
 	GetLast20Transactions(ctx context.Context) (trans []*models.Transaction, err error)
