@@ -11,6 +11,8 @@ import (
 )
 
 const (
+	debtTypeImCreditor  = true
+	debtTypeImDebtor    = false
 	transactionsCount   = 20
 	categoryTypeExpense = true
 	categoryTypeIncome  = false
@@ -30,6 +32,28 @@ func (t *Transactions) CreateTransaction(
 	log := t.log.With(slog.String("op", op))
 
 	trans.Id = uuid.New()
+
+	log.Info("verifying bill")
+	if trans.TransType == transTypeIncome ||
+		(trans.TransType == transTypeDebt && trans.DebtType == debtTypeImDebtor) ||
+		trans.TransType == transTypeTransfer {
+		err = verifyBill(ctx, trans.IdBillTo, t)
+		if err != nil {
+			log.Error("%w", err)
+
+			return fmt.Errorf("%s: %w", op, err)
+		}
+	}
+	if trans.TransType == transTypeExpense ||
+		(trans.TransType == transTypeDebt && trans.DebtType == debtTypeImCreditor) ||
+		trans.TransType == transTypeTransfer {
+		err = verifyBill(ctx, trans.IdBillFrom, t)
+		if err != nil {
+			log.Error("%w", err)
+
+			return fmt.Errorf("%s: %w", op, err)
+		}
+	}
 
 	// HACK: может быть имеет смысл вынести в отдельную функцию
 	if trans.TransType == transTypeIncome || trans.TransType == transTypeExpense {
@@ -68,6 +92,28 @@ func (t *Transactions) CreateTransaction(
 func (t *Transactions) UpdateTransaction(ctx context.Context, trans *models.Transaction) (err error) {
 	const op = "pigletTransactions | transactions.UpdateTransaction"
 	log := t.log.With(slog.String("op", op))
+
+	log.Info("verifying bill")
+	if trans.TransType == transTypeIncome ||
+		(trans.TransType == transTypeDebt && trans.DebtType == debtTypeImDebtor) ||
+		trans.TransType == transTypeTransfer {
+		err = verifyBill(ctx, trans.IdBillTo, t)
+		if err != nil {
+			log.Error("%w", err)
+
+			return fmt.Errorf("%s: %w", op, err)
+		}
+	}
+	if trans.TransType == transTypeExpense ||
+		(trans.TransType == transTypeDebt && trans.DebtType == debtTypeImCreditor) ||
+		trans.TransType == transTypeTransfer {
+		err = verifyBill(ctx, trans.IdBillFrom, t)
+		if err != nil {
+			log.Error("%w", err)
+
+			return fmt.Errorf("%s: %w", op, err)
+		}
+	}
 
 	// HACK: может быть имеет смысл вынести в отдельную функцию
 	if trans.TransType == transTypeIncome || trans.TransType == transTypeExpense {
