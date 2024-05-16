@@ -85,8 +85,8 @@ const (
 )
 
 const (
-	InsertBill = `INSERT INTO bills (id, status) VALUES ($1, $2)`
-	UpdateBill = `UPDATE bills SET status = $2 WHERE id = $1`
-	GetBill    = `SELECT status FROM bills WHERE id = $1`
-	DeleteBill = `DELETE FROM bills WHERE id = $1`
+	InsertBill = `INSERT INTO actual_bills (id, status) VALUES ($1, $2)`
+	UpdateBill = `UPDATE actual_bills SET status = $2 WHERE id = $1`
+	GetBill    = `SELECT status FROM actual_bills WHERE id = $1`
+	DeleteBill = `DELETE FROM actual_bills WHERE id = $1`
 )

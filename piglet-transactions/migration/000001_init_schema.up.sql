@@ -44,14 +44,10 @@ CREATE TABLE "categories" (
     "mandatory" bool
 );
 
-CREATE TABLE "bills" (
+CREATE TABLE "actual_bills" (
    "id" uuid PRIMARY KEY,
    "status" bool
 );
-
-INSERT INTO categories (id, type, name, mandatory) VALUES ('00000000-0000-0000-0000-000000000000', true, 'no category', false);
-INSERT INTO categories (id, type, name, mandatory) VALUES ('00000000-0000-0000-0000-000000000001', false, 'no category', false);
-INSERT INTO bills (id, status)  VALUES ('00000000-0000-0000-0000-000000000001', true);
 
 CREATE INDEX ON "transactions" ("trans_date");
 
@@ -81,22 +77,22 @@ ALTER TABLE "income" ADD FOREIGN KEY ("trans_id") REFERENCES "transactions" ("id
 
 ALTER TABLE "income" ADD FOREIGN KEY ("id_category") REFERENCES "categories" ("id");
 
-ALTER TABLE "income" ADD FOREIGN KEY ("id_bill_to") REFERENCES "bills" ("id");
+ALTER TABLE "income" ADD FOREIGN KEY ("id_bill_to") REFERENCES "actual_bills" ("id");
 
 ALTER TABLE "expense" ADD FOREIGN KEY ("trans_id") REFERENCES "transactions" ("id");
 
 ALTER TABLE "expense" ADD FOREIGN KEY ("id_category") REFERENCES "categories" ("id");
 
-ALTER TABLE "expense" ADD FOREIGN KEY ("id_bill_from") REFERENCES "bills" ("id");
+ALTER TABLE "expense" ADD FOREIGN KEY ("id_bill_from") REFERENCES "actual_bills" ("id");
 
 ALTER TABLE "debt" ADD FOREIGN KEY ("trans_id") REFERENCES "transactions" ("id");
 
-ALTER TABLE "debt" ADD FOREIGN KEY ("id_bill_from") REFERENCES "bills" ("id");
+ALTER TABLE "debt" ADD FOREIGN KEY ("id_bill_from") REFERENCES "actual_bills" ("id");
 
-ALTER TABLE "debt" ADD FOREIGN KEY ("id_bill_to") REFERENCES "bills" ("id");
+ALTER TABLE "debt" ADD FOREIGN KEY ("id_bill_to") REFERENCES "actual_bills" ("id");
 
 ALTER TABLE "transfer" ADD FOREIGN KEY ("trans_id") REFERENCES "transactions" ("id");
 
-ALTER TABLE "transfer" ADD FOREIGN KEY ("id_bill_from") REFERENCES "bills" ("id");
+ALTER TABLE "transfer" ADD FOREIGN KEY ("id_bill_from") REFERENCES "actual_bills" ("id");
 
-ALTER TABLE "transfer" ADD FOREIGN KEY ("id_bill_to") REFERENCES "bills" ("id");
+ALTER TABLE "transfer" ADD FOREIGN KEY ("id_bill_to") REFERENCES "actual_bills" ("id");
