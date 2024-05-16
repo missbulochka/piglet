@@ -19,8 +19,6 @@ func (t *Transactions) CreateCategory(ctx context.Context, cat *models.Category)
 	cat.Id = uuid.New()
 
 	existCat, err := t.categoryProvider.GetCategory(ctx, cat.Name)
-	fmt.Println(cat)
-	fmt.Println(existCat)
 	if err == nil {
 		if cat.Name == existCat.Name && cat.CategoryType == existCat.CategoryType {
 			log.Error("failed to save transaction: category exist", err)
