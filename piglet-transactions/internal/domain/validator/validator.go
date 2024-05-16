@@ -143,6 +143,14 @@ func CategoryValidator(
 	return category, nil
 }
 
+func BillValidator(id string) (uuidId uuid.UUID, err error) {
+	uuidId, err = uuid.Parse(id)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("invalid category creditals: %v", codes.InvalidArgument)
+	}
+	return uuidId, nil
+}
+
 func simpleVal(
 	val *validator.Validate,
 	tr ValTrans,
