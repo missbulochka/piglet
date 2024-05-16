@@ -41,7 +41,9 @@ func TransValidator(
 	val := validator.New(validator.WithRequiredStructEnabled())
 
 	if len(id) != 0 {
-		trans.Id = uuid.MustParse(id)
+		if trans.Id, err = uuid.Parse(id); err != nil {
+			return trans, err
+		}
 	}
 
 	if err = simpleVal(val,
@@ -123,7 +125,9 @@ func CategoryValidator(
 	val := validator.New(validator.WithRequiredStructEnabled())
 
 	if len(id) != 0 {
-		category.Id = uuid.MustParse(id)
+		if category.Id, err = uuid.Parse(id); err != nil {
+			return category, fmt.Errorf("invalid category creditals: %v", codes.InvalidArgument)
+		}
 	}
 
 	if err = val.Struct(
@@ -182,7 +186,7 @@ func incomeValidator(
 	val *validator.Validate,
 	tr ValIncome,
 	trans *models.Transaction,
-) error {
+) (err error) {
 	if err := val.Struct(tr); err != nil {
 		return fmt.Errorf("invalid income creditals: %v", codes.InvalidArgument)
 	}
@@ -190,10 +194,15 @@ func incomeValidator(
 	if len(tr.IdCategory) == 0 {
 		trans.IdCategory = noCategoryIncUUID
 	} else {
-		trans.IdCategory = uuid.MustParse(tr.IdCategory)
+		if trans.IdCategory, err = uuid.Parse(tr.IdCategory); err != nil {
+			return fmt.Errorf("invalid income creditals: %v", codes.InvalidArgument)
+		}
+	}
+
+	if trans.IdBillTo, err = uuid.Parse(tr.IdBillTo); err != nil {
+		return fmt.Errorf("invalid income creditals: %v", codes.InvalidArgument)
 	}
 	// HACK: обработка ошибок
-	trans.IdBillTo = uuid.MustParse(tr.IdBillTo)
 	trans.Person = tr.Sender
 	trans.Repeat = tr.Repeat
 
