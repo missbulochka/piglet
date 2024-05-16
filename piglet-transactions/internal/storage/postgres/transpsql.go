@@ -24,6 +24,7 @@ func (s *Storage) SaveTransaction(
 ) error {
 	const op = "piglet-transactions | storage.postgres.SaveTransaction"
 
+	s.transMutex.Lock()
 	row := s.db.QueryRowContext(
 		ctx,
 		storage.InsertTransaction,
@@ -32,12 +33,14 @@ func (s *Storage) SaveTransaction(
 		trans.TransType,
 		trans.Sum,
 		trans.Comment)
+	s.transMutex.Unlock()
 	if row.Err() != nil {
 		return fmt.Errorf("%s: %w", op, row.Err())
 	}
 
 	switch trans.TransType {
 	case transTypeIncome:
+		s.incMutex.Lock()
 		row = s.db.QueryRowContext(
 			ctx,
 			storage.InsertIncome,
@@ -47,7 +50,9 @@ func (s *Storage) SaveTransaction(
 			trans.Person,
 			trans.Repeat,
 		)
+		s.incMutex.Unlock()
 	case transTypeExpense:
+		s.expMutex.Lock()
 		row = s.db.QueryRowContext(
 			ctx,
 			storage.InsertExpense,
@@ -57,7 +62,9 @@ func (s *Storage) SaveTransaction(
 			trans.Person,
 			trans.Repeat,
 		)
+		s.expMutex.Unlock()
 	case transTypeDebt:
+		s.debtMutex.Lock()
 		row = s.db.QueryRowContext(
 			ctx,
 			storage.InsertDebt,
@@ -67,7 +74,9 @@ func (s *Storage) SaveTransaction(
 			trans.IdBillTo,
 			trans.Person,
 		)
+		s.debtMutex.Unlock()
 	case transTypeTransfer:
+		s.transferMutex.Lock()
 		row = s.db.QueryRowContext(
 			ctx,
 			storage.InsertTransfer,
@@ -75,6 +84,7 @@ func (s *Storage) SaveTransaction(
 			trans.IdBillFrom,
 			trans.IdBillTo,
 		)
+		s.transferMutex.Unlock()
 	default:
 		// TODO: удалить запись в таблице transactions
 		return fmt.Errorf("%s: unknown error", op)
@@ -91,6 +101,7 @@ func (s *Storage) SaveTransaction(
 func (s *Storage) UpdateTransaction(ctx context.Context, trans models.Transaction) (err error) {
 	const op = "piglet-transactions | storage.postgres.UpdateTransaction"
 
+	s.transMutex.Lock()
 	row := s.db.QueryRowContext(
 		ctx,
 		storage.UpdateTransaction,
@@ -99,12 +110,14 @@ func (s *Storage) UpdateTransaction(ctx context.Context, trans models.Transactio
 		trans.TransType,
 		trans.Sum,
 		trans.Comment)
+	s.transMutex.Unlock()
 	if row.Err() != nil {
 		return fmt.Errorf("%s: %w", op, row.Err())
 	}
 
 	switch trans.TransType {
 	case transTypeIncome:
+		s.incMutex.Lock()
 		row = s.db.QueryRowContext(
 			ctx,
 			storage.UpdateIncome,
@@ -114,7 +127,9 @@ func (s *Storage) UpdateTransaction(ctx context.Context, trans models.Transactio
 			trans.Person,
 			trans.Repeat,
 		)
+		s.incMutex.Unlock()
 	case transTypeExpense:
+		s.expMutex.Lock()
 		row = s.db.QueryRowContext(
 			ctx,
 			storage.UpdateExpense,
@@ -124,7 +139,9 @@ func (s *Storage) UpdateTransaction(ctx context.Context, trans models.Transactio
 			trans.Person,
 			trans.Repeat,
 		)
+		s.expMutex.Unlock()
 	case transTypeDebt:
+		s.debtMutex.Lock()
 		row = s.db.QueryRowContext(
 			ctx,
 			storage.UpdateDebt,
@@ -134,7 +151,9 @@ func (s *Storage) UpdateTransaction(ctx context.Context, trans models.Transactio
 			trans.IdBillTo,
 			trans.Person,
 		)
+		s.debtMutex.Unlock()
 	case transTypeTransfer:
+		s.transferMutex.Lock()
 		row = s.db.QueryRowContext(
 			ctx,
 			storage.UpdateTransfer,
@@ -142,6 +161,7 @@ func (s *Storage) UpdateTransaction(ctx context.Context, trans models.Transactio
 			trans.IdBillFrom,
 			trans.IdBillTo,
 		)
+		s.transferMutex.Unlock()
 	default:
 		return fmt.Errorf("%s: unknown error", op)
 	}
@@ -161,13 +181,21 @@ func (s *Storage) DeleteTransaction(ctx context.Context, id uuid.UUID, transType
 
 	switch transType {
 	case transTypeIncome:
+		s.incMutex.Lock()
 		row = s.db.QueryRowContext(ctx, storage.DeleteIncome, id)
+		s.incMutex.Unlock()
 	case transTypeExpense:
+		s.expMutex.Lock()
 		row = s.db.QueryRowContext(ctx, storage.DeleteExpenses, id)
+		s.expMutex.Unlock()
 	case transTypeDebt:
+		s.debtMutex.Lock()
 		row = s.db.QueryRowContext(ctx, storage.DeleteDebt, id)
+		s.debtMutex.Unlock()
 	case transTypeTransfer:
+		s.transferMutex.Lock()
 		row = s.db.QueryRowContext(ctx, storage.DeleteTransfer, id)
+		s.transferMutex.Unlock()
 	default:
 		return fmt.Errorf("%s: unknown error", op)
 	}
@@ -176,7 +204,9 @@ func (s *Storage) DeleteTransaction(ctx context.Context, id uuid.UUID, transType
 		return fmt.Errorf("%s: %w", op, row.Err())
 	}
 
+	s.transMutex.Lock()
 	row = s.db.QueryRowContext(ctx, storage.DeleteTransaction, id)
+	s.transMutex.Unlock()
 
 	if row.Err() != nil {
 		return fmt.Errorf("%s: %w", op, row.Err())
@@ -194,7 +224,9 @@ func (s *Storage) GetTransaction(
 
 	var row *sql.Row
 
+	s.transMutex.Lock()
 	row = s.db.QueryRowContext(ctx, storage.GetOneTransaction, id)
+	s.transMutex.Unlock()
 	err = row.Scan(
 		&trans.Date,
 		&trans.TransType,
@@ -207,7 +239,9 @@ func (s *Storage) GetTransaction(
 
 	switch trans.TransType {
 	case transTypeIncome:
+		s.incMutex.Lock()
 		row = s.db.QueryRowContext(ctx, storage.GetOneIncome, id)
+		s.incMutex.Unlock()
 		err = row.Scan(
 			&trans.IdCategory,
 			&trans.IdBillTo,
@@ -215,7 +249,9 @@ func (s *Storage) GetTransaction(
 			&trans.Repeat,
 		)
 	case transTypeExpense:
+		s.expMutex.Lock()
 		row = s.db.QueryRowContext(ctx, storage.GetOneExpense, id)
+		s.expMutex.Unlock()
 		err = row.Scan(
 			&trans.IdCategory,
 			&trans.IdBillFrom,
@@ -223,7 +259,9 @@ func (s *Storage) GetTransaction(
 			&trans.Repeat,
 		)
 	case transTypeDebt:
+		s.debtMutex.Lock()
 		row = s.db.QueryRowContext(ctx, storage.GetOneDebt, id)
+		s.debtMutex.Unlock()
 		err = row.Scan(
 			&trans.DebtType,
 			&trans.IdBillFrom,
@@ -231,7 +269,9 @@ func (s *Storage) GetTransaction(
 			&trans.Person,
 		)
 	case transTypeTransfer:
+		s.transferMutex.Lock()
 		row = s.db.QueryRowContext(ctx, storage.GetOneTransfer, id)
+		s.transferMutex.Unlock()
 		err = row.Scan(
 			&trans.IdBillFrom,
 			&trans.IdBillTo,
@@ -255,7 +295,9 @@ func (s *Storage) GetSomeTransactions(
 	count uint8) (err error) {
 	const op = "piglet-transactions | storage.postgres.GetSomeTransactions"
 
+	s.transMutex.Lock()
 	rows, err := s.db.QueryContext(ctx, storage.GetSomeTransactions, count)
+	s.transMutex.Lock()
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}

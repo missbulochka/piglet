@@ -13,6 +13,7 @@ import (
 func (s *Storage) SaveCategory(ctx context.Context, cat models.Category) (err error) {
 	const op = "piglet-transactions | storage.postgres.SaveCategory"
 
+	s.catMutex.Lock()
 	row := s.db.QueryRowContext(
 		ctx,
 		storage.InsertCategory,
@@ -21,6 +22,7 @@ func (s *Storage) SaveCategory(ctx context.Context, cat models.Category) (err er
 		cat.Name,
 		cat.Mandatory,
 	)
+	s.catMutex.Unlock()
 	if row.Err() != nil {
 		return fmt.Errorf("%s: %w", op, row.Err())
 	}
@@ -31,6 +33,7 @@ func (s *Storage) SaveCategory(ctx context.Context, cat models.Category) (err er
 func (s *Storage) UpdateCategory(ctx context.Context, cat models.Category) (err error) {
 	const op = "piglet-bills | storage.psql.UpdateCategory"
 
+	s.catMutex.Lock()
 	row := s.db.QueryRowContext(
 		ctx,
 		storage.UpdateCategory,
@@ -39,6 +42,7 @@ func (s *Storage) UpdateCategory(ctx context.Context, cat models.Category) (err 
 		cat.Name,
 		cat.Mandatory,
 	)
+	s.catMutex.Unlock()
 	if row.Err() != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
@@ -52,7 +56,9 @@ func (s *Storage) GetCategory(
 ) (category models.Category, err error) {
 	const op = "piglet-transactions | storage.postgres.GetCategory"
 
+	s.catMutex.Lock()
 	row := s.db.QueryRowContext(ctx, storage.GetCategory, search)
+	s.catMutex.Unlock()
 	if err = row.Scan(
 		&category.Id,
 		&category.CategoryType,
@@ -68,7 +74,9 @@ func (s *Storage) GetCategory(
 func (s *Storage) GetAllCategories(ctx context.Context, cat *[]*models.Category) (err error) {
 	const op = "piglet-transactions | storage.postgres.GetSomeCategories"
 
+	s.catMutex.Lock()
 	rows, err := s.db.QueryContext(ctx, storage.GetAllCategories)
+	s.catMutex.Unlock()
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
@@ -101,7 +109,9 @@ func (s *Storage) GetAllCategories(ctx context.Context, cat *[]*models.Category)
 func (s *Storage) DeleteCategory(ctx context.Context, id uuid.UUID) (err error) {
 	const op = "piglet-transactions | storage.postgres.DeleteCategory"
 
+	s.catMutex.Lock()
 	row := s.db.QueryRowContext(ctx, storage.DeleteCategory, id)
+	s.catMutex.Unlock()
 
 	if row.Err() != nil {
 		return fmt.Errorf("%s: %w", op, row.Err())

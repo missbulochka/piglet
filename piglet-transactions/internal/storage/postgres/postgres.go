@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,7 +15,14 @@ import (
 )
 
 type Storage struct {
-	db *sql.DB
+	db            *sql.DB
+	billsMutex    sync.Mutex
+	catMutex      sync.Mutex
+	transMutex    sync.Mutex
+	incMutex      sync.Mutex
+	expMutex      sync.Mutex
+	debtMutex     sync.Mutex
+	transferMutex sync.Mutex
 }
 
 func New(log *slog.Logger, dataSourceName string) (*Storage, error) {
