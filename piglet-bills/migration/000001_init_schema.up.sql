@@ -18,6 +18,10 @@ CREATE TABLE "accounts" (
     "bill_status" bool
 );
 
+INSERT INTO bills (id, bill_name, current_sum, bill_type)
+    VALUES ('00000000-0000-0000-0000-000000000001', 'default bill', 0, true);
+INSERT INTO accounts (bill_id, bill_status) VALUES ('00000000-0000-0000-0000-000000000001', true);
+
 CREATE INDEX ON "bills" ("bill_name");
 
 CREATE INDEX ON "bills" ("bill_type");
