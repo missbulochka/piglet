@@ -21,13 +21,14 @@ func New(
 	log *slog.Logger,
 	transactionsService transactionsgrpc.Transactions,
 	categoryService transactionsgrpc.Categories,
+	billService transactionsgrpc.Bills,
 	grpcBillsCli *grpc.ClientConn,
 	server string,
 	port string,
 ) *App {
 	gRPCServer := grpc.NewServer()
 
-	transactionsgrpc.Register(gRPCServer, grpcBillsCli, transactionsService, categoryService)
+	transactionsgrpc.Register(gRPCServer, grpcBillsCli, transactionsService, categoryService, billService)
 
 	return &App{
 		log:        log,

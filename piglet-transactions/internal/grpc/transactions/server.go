@@ -16,6 +16,7 @@ type serverAPI struct {
 	billsCli     billsv1.PigletBillsClient
 	transactions Transactions
 	categories   Categories
+	bills        Bills
 }
 
 type Transactions interface {
@@ -34,12 +35,22 @@ type Categories interface {
 	GetAllCategories(ctx context.Context) (cat []*models.Category, err error)
 }
 
-func Register(gRPCServer *grpc.Server, conn *grpc.ClientConn, transactions Transactions, categories Categories) {
+type Bills interface {
+	UpdateBills(ctx context.Context, id uuid.UUID, billStatus bool, del bool) (err error)
+}
+
+func Register(
+	gRPCServer *grpc.Server,
+	conn *grpc.ClientConn,
+	transactions Transactions,
+	categories Categories,
+	bills Bills) {
 	transv1.RegisterPigletTransactionsServer(
 		gRPCServer,
 		&serverAPI{
 			transactions: transactions,
 			categories:   categories,
+			bills:        bills,
 			billsCli:     billsv1.NewPigletBillsClient(conn),
 		})
 }

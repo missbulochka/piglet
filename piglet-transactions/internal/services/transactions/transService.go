@@ -17,6 +17,7 @@ type Transactions struct {
 	transProvider    TransactionProvider
 	categorySaver    CategorySaver
 	categoryProvider CategoryProvider
+	billUpdater      BillUpdater
 }
 
 type TransactionSaver interface {
@@ -50,6 +51,13 @@ type CategoryProvider interface {
 	GetAllCategories(ctx context.Context, cat *[]*models.Category) (err error)
 }
 
+type BillUpdater interface {
+	SaveBill(ctx context.Context, id uuid.UUID, billStatus bool) (err error)
+	UpdateBill(ctx context.Context, id uuid.UUID, billStatus bool) (err error)
+	GetBill(ctx context.Context, id uuid.UUID) (status bool, err error)
+	DeleteBill(ctx context.Context, id uuid.UUID) (err error)
+}
+
 // New returns a new interface of the Transactions service
 func New(
 	log *slog.Logger,
@@ -57,6 +65,7 @@ func New(
 	transProvider TransactionProvider,
 	categorySaver CategorySaver,
 	categoryProvider CategoryProvider,
+	billUpdater BillUpdater,
 ) *Transactions {
 	return &Transactions{
 		log:              log,
@@ -64,5 +73,6 @@ func New(
 		transProvider:    transProvider,
 		categorySaver:    categorySaver,
 		categoryProvider: categoryProvider,
+		billUpdater:      billUpdater,
 	}
 }

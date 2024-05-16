@@ -63,53 +63,6 @@ func BillFixer(
 	}(ctx, floatSum, id, cli)
 }
 
-func VerifyBills(
-	ctx context.Context,
-	cli billsv1.PigletBillsClient,
-	trans *models.Transaction,
-) (err error) {
-	existTo, err := cli.VerifyBill(
-		ctx,
-		&billsv1.IdRequest{
-			Id: trans.IdBillTo.String(),
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	existFrom, err := cli.VerifyBill(
-		ctx,
-		&billsv1.IdRequest{
-			Id: trans.IdBillFrom.String(),
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	switch trans.TransType {
-	case transTypeIncome:
-		if existTo.Success == true {
-			return nil
-		}
-	case transTypeExpense:
-		if existFrom.Success == true {
-			return nil
-		}
-	case transTypeDebt:
-		if existFrom.Success == true || existTo.Success == true {
-			return nil
-		}
-	case transTypeTransfer:
-		if existTo.Success == true && existFrom.Success == true {
-			return nil
-		}
-	}
-
-	return fmt.Errorf("bill varification failed")
-}
-
 func ReturnTransactions(trans []*models.Transaction) (resTrans []*transv1.Transaction) {
 	for _, tr := range trans {
 		// HACK: обработка ошибок

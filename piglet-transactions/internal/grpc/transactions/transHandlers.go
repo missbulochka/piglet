@@ -2,8 +2,6 @@ package transactionsgrpc
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -39,10 +37,10 @@ func (s *serverAPI) CreateTransaction(
 		return nil, status.Errorf(codes.InvalidArgument, "invalid creditals")
 	}
 
-	if err = VerifyBills(ctx, s.billsCli, &trans); err != nil {
-		return nil, err
-	}
-	fmt.Println("bill verified")
+	//if err = VerifyBills(ctx, s.billsCli, &trans); err != nil {
+	//	return nil, err
+	//}
+	//fmt.Println("bill verified")
 
 	if err = s.transactions.CreateTransaction(ctx, &trans); err != nil {
 		// TODO: проверка ошибки о несуществовании счета или категории
@@ -100,10 +98,10 @@ func (s *serverAPI) UpdateTransaction(
 		return nil, status.Errorf(codes.InvalidArgument, "invalid creditals")
 	}
 
-	if err = VerifyBills(ctx, s.billsCli, &trans); err != nil {
-		return nil, err
-	}
-	fmt.Println("bill verified")
+	//if err = VerifyBills(ctx, s.billsCli, &trans); err != nil {
+	//	return nil, err
+	//}
+	//fmt.Println("bill verified")
 
 	if err = s.transactions.UpdateTransaction(ctx, &trans); err != nil {
 		return nil, status.Errorf(codes.Internal, "internal error")
