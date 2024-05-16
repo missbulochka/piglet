@@ -44,6 +44,11 @@ CREATE TABLE "categories" (
     "mandatory" bool
 );
 
+CREATE TABLE "bills" (
+   "id" uuid PRIMARY KEY,
+   "status" bool
+);
+
 INSERT INTO categories (id, type, name, mandatory) VALUES ('00000000-0000-0000-0000-000000000000', true, 'no category', false);
 INSERT INTO categories (id, type, name, mandatory) VALUES ('00000000-0000-0000-0000-000000000001', false, 'no category', false);
 
@@ -75,10 +80,22 @@ ALTER TABLE "income" ADD FOREIGN KEY ("trans_id") REFERENCES "transactions" ("id
 
 ALTER TABLE "income" ADD FOREIGN KEY ("id_category") REFERENCES "categories" ("id");
 
+ALTER TABLE "income" ADD FOREIGN KEY ("id_bill_to") REFERENCES "bills" ("id");
+
 ALTER TABLE "expense" ADD FOREIGN KEY ("trans_id") REFERENCES "transactions" ("id");
 
 ALTER TABLE "expense" ADD FOREIGN KEY ("id_category") REFERENCES "categories" ("id");
 
+ALTER TABLE "expense" ADD FOREIGN KEY ("id_bill_from") REFERENCES "bills" ("id");
+
 ALTER TABLE "debt" ADD FOREIGN KEY ("trans_id") REFERENCES "transactions" ("id");
 
+ALTER TABLE "debt" ADD FOREIGN KEY ("id_bill_from") REFERENCES "bills" ("id");
+
+ALTER TABLE "debt" ADD FOREIGN KEY ("id_bill_to") REFERENCES "bills" ("id");
+
 ALTER TABLE "transfer" ADD FOREIGN KEY ("trans_id") REFERENCES "transactions" ("id");
+
+ALTER TABLE "transfer" ADD FOREIGN KEY ("id_bill_from") REFERENCES "bills" ("id");
+
+ALTER TABLE "transfer" ADD FOREIGN KEY ("id_bill_to") REFERENCES "bills" ("id");
