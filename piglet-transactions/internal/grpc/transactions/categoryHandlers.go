@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	transv1 "github.com/missbulochka/protos/gen/piglet-transactions"
 	validation "piglet-transactions-service/internal/domain/validator"
@@ -99,7 +100,7 @@ func (s *serverAPI) GetCategory(
 
 func (s *serverAPI) GetAllCategories(
 	ctx context.Context,
-	req *transv1.EmptyRequest,
+	req *emptypb.Empty,
 ) (*transv1.GetAllCategoriesResponse, error) {
 	cat, err := s.categories.GetAllCategories(ctx)
 	if err != nil {

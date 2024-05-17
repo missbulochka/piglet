@@ -86,7 +86,7 @@ func (s *serverAPI) CreateBill(
 		ctx,
 		req.GetBillType(),
 		req.GetBillName(),
-		decimal.NewFromFloat32(req.GetGoalSum()),
+		decimal.NewFromFloat(req.GetGoalSum()),
 		req.GetDate().AsTime(),
 	)
 	if err != nil {
@@ -102,7 +102,7 @@ func (s *serverAPI) CreateBill(
 	// HACK: поработать над преобразованиями и обработкой ошибок
 	currentSum, _ := bill.CurrentSum.Float64()
 	newGoalSum, _ := bill.GoalSum.Float64()
-	monthlyPayment := uint32(int32(bill.MonthlyPayment.IntPart()))
+	monthlyPayment := uint32(bill.MonthlyPayment.IntPart())
 
 	return &billsv1.BillResponse{
 		Bill: &billsv1.Bill{
@@ -110,8 +110,8 @@ func (s *serverAPI) CreateBill(
 			BillType:       bill.BillType,
 			BillStatus:     bill.BillStatus,
 			BillName:       bill.Name,
-			CurrentSum:     float32(currentSum),
-			GoalSum:        float32(newGoalSum),
+			CurrentSum:     currentSum,
+			GoalSum:        newGoalSum,
 			Date:           timestamppb.New(bill.Date),
 			MonthlyPayment: monthlyPayment,
 		},
@@ -121,7 +121,7 @@ func (s *serverAPI) CreateBill(
 // HACK: возврат нескольких счетов, getSomeBills получает массив с id (?)
 func (s *serverAPI) GetAllAccounts(
 	ctx context.Context,
-	req *billsv1.GetSomeBillsRequest,
+	req *emptypb.Empty,
 ) (*billsv1.GetSomeBillsResponse, error) {
 	bills, err := s.accounting.GetSomeBills(ctx, accountType)
 	if err != nil {
@@ -138,7 +138,7 @@ func (s *serverAPI) GetAllAccounts(
 
 func (s *serverAPI) GetAllGoals(
 	ctx context.Context,
-	req *billsv1.GetSomeBillsRequest,
+	req *emptypb.Empty,
 ) (*billsv1.GetSomeBillsResponse, error) {
 	bills, err := s.accounting.GetSomeBills(ctx, goalType)
 	if err != nil {
@@ -173,15 +173,15 @@ func (s *serverAPI) GetBill(
 	// HACK: поработать над преобразованиями и обработкой ошибок
 	currentSum, _ := bill.CurrentSum.Float64()
 	newGoalSum, _ := bill.GoalSum.Float64()
-	monthlyPayment := uint32(int32(bill.MonthlyPayment.IntPart()))
+	monthlyPayment := uint32(bill.MonthlyPayment.IntPart())
 	return &billsv1.BillResponse{
 		Bill: &billsv1.Bill{
 			Id:             bill.ID,
 			BillType:       bill.BillType,
 			BillStatus:     bill.BillStatus,
 			BillName:       bill.Name,
-			CurrentSum:     float32(currentSum),
-			GoalSum:        float32(newGoalSum),
+			CurrentSum:     currentSum,
+			GoalSum:        newGoalSum,
 			Date:           timestamppb.New(bill.Date),
 			MonthlyPayment: monthlyPayment,
 		},
@@ -201,9 +201,9 @@ func (s *serverAPI) UpdateBill(
 		ctx,
 		req.GetId(),
 		req.GetBillName(),
-		decimal.NewFromFloat32(req.GetCurrentSum()),
+		decimal.NewFromFloat(req.GetCurrentSum()),
 		req.GetBillStatus(),
-		decimal.NewFromFloat32(req.GetGoalSum()),
+		decimal.NewFromFloat(req.GetGoalSum()),
 		req.GetDate().AsTime(),
 	)
 	if err != nil {
@@ -220,7 +220,7 @@ func (s *serverAPI) UpdateBill(
 	// HACK: поработать над преобразованиями и обработкой ошибок
 	newCurrentSum, _ := bill.CurrentSum.Float64()
 	newGoalSum, _ := bill.GoalSum.Float64()
-	monthlyPayment := uint32(int32(bill.MonthlyPayment.IntPart()))
+	monthlyPayment := uint32(bill.MonthlyPayment.IntPart())
 
 	return &billsv1.BillResponse{
 		Bill: &billsv1.Bill{
@@ -228,8 +228,8 @@ func (s *serverAPI) UpdateBill(
 			BillType:       bill.BillType,
 			BillStatus:     bill.BillStatus,
 			BillName:       bill.Name,
-			CurrentSum:     float32(newCurrentSum),
-			GoalSum:        float32(newGoalSum),
+			CurrentSum:     newCurrentSum,
+			GoalSum:        newGoalSum,
 			Date:           timestamppb.New(bill.Date),
 			MonthlyPayment: monthlyPayment,
 		},
@@ -277,8 +277,7 @@ func (s *serverAPI) FixBillSum(
 		fmt.Println("invalid uuid")
 	}
 
-	sum := decimal.NewFromFloat32(req.GetSum())
-	fmt.Println(sum)
+	sum := decimal.NewFromFloat(req.GetSum())
 
 	err := s.accounting.FixBillSum(ctx, req.GetId(), sum)
 	if err != nil {

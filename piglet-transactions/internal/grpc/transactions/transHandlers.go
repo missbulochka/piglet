@@ -2,9 +2,11 @@ package transactionsgrpc
 
 import (
 	"context"
+
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	transv1 "github.com/missbulochka/protos/gen/piglet-transactions"
@@ -60,7 +62,7 @@ func (s *serverAPI) CreateTransaction(
 			Id:         trans.Id.String(),
 			Date:       timestamppb.New(trans.Date),
 			TransType:  int32(trans.TransType),
-			Sum:        float32(sumFoProto),
+			Sum:        sumFoProto,
 			Comment:    trans.Comment,
 			IdCategory: trans.Comment,
 			DebtType:   trans.DebtType,
@@ -115,7 +117,7 @@ func (s *serverAPI) UpdateTransaction(
 			Id:         trans.Id.String(),
 			Date:       timestamppb.New(trans.Date),
 			TransType:  int32(trans.TransType),
-			Sum:        float32(sumFoProto),
+			Sum:        sumFoProto,
 			Comment:    trans.Comment,
 			IdCategory: trans.Comment,
 			DebtType:   trans.DebtType,
@@ -185,7 +187,7 @@ func (s *serverAPI) GetTransaction(
 			Id:         trans.Id.String(),
 			Date:       timestamppb.New(trans.Date),
 			TransType:  int32(trans.TransType),
-			Sum:        float32(sumFoProto),
+			Sum:        sumFoProto,
 			Comment:    trans.Comment,
 			IdCategory: trans.Comment,
 			DebtType:   trans.DebtType,
@@ -199,7 +201,7 @@ func (s *serverAPI) GetTransaction(
 
 func (s *serverAPI) GetAllTransactions(
 	ctx context.Context,
-	req *transv1.EmptyRequest,
+	req *emptypb.Empty,
 ) (*transv1.GetAllTransactionsResponse, error) {
 	trans, err := s.transactions.GetLast20Transactions(ctx)
 	if err != nil {
