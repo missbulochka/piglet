@@ -29,7 +29,7 @@ func TransValidator(
 	id string,
 	date *timestamppb.Timestamp,
 	transType int32,
-	sum float32,
+	sum float64,
 	comment string,
 	idCategory string,
 	debtType bool,
@@ -176,7 +176,7 @@ func simpleVal(
 
 	trans.Date = date
 	trans.TransType = uint8(tr.TransType)
-	trans.Sum = decimal.NewFromFloat32(tr.Sum)
+	trans.Sum = decimal.NewFromFloat(tr.Sum)
 	trans.Comment = tr.Comment
 
 	return nil

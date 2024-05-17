@@ -7,7 +7,7 @@ import (
 type ValTrans struct {
 	Date      *timestamppb.Timestamp
 	TransType int32   `validate:"required,min=1,max=4"`
-	Sum       float32 `validate:"required,min=0.001"`
+	Sum       float64 `validate:"required,min=0.001"`
 	Comment   string
 }
 
