@@ -69,15 +69,15 @@ func billsConversion(bills []*models.Bill) []*billsv1.Bill {
 	for _, bill := range bills {
 		currentSum, _ := bill.CurrentSum.Float64()
 		goalSum, _ := bill.GoalSum.Float64()
-		monthlyPayment := uint32(int32(bill.MonthlyPayment.IntPart()))
+		monthlyPayment := uint32(bill.MonthlyPayment.IntPart())
 
 		resBill := &billsv1.Bill{
 			Id:             bill.ID,
 			BillType:       bill.BillType,
 			BillStatus:     bill.BillStatus,
 			BillName:       bill.Name,
-			CurrentSum:     float32(currentSum),
-			GoalSum:        float32(goalSum),
+			CurrentSum:     currentSum,
+			GoalSum:        goalSum,
 			Date:           timestamppb.New(bill.Date),
 			MonthlyPayment: monthlyPayment,
 		}

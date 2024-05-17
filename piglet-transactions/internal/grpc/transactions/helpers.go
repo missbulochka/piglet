@@ -29,14 +29,13 @@ func BillFixer(
 ) {
 	ctx := context.Background()
 	var id string
-	var floatSum float32
+	var floatSum float64
 
 	if transType == transTypeIncome ||
 		(transType == transTypeDebt && debtType == debtTypeImDebtor) ||
 		transType == transTypeTransfer {
 		// HACK: обработка ошибок
-		float64Sum, _ := sum.Float64()
-		floatSum = float32(float64Sum)
+		floatSum, _ = sum.Float64()
 		id = idTo
 	}
 
@@ -44,12 +43,11 @@ func BillFixer(
 		(transType == transTypeDebt && debtType == debtTypeImCreditor) ||
 		transType == transTypeTransfer {
 		// HACK: обработка ошибок
-		float64Sum, _ := sum.Neg().Float64()
-		floatSum = float32(float64Sum)
+		floatSum, _ = sum.Neg().Float64()
 		id = idFrom
 	}
 
-	go func(ctx context.Context, sum float32, id string, cli billsv1.PigletBillsClient) {
+	go func(ctx context.Context, sum float64, id string, cli billsv1.PigletBillsClient) {
 		_, err := cli.FixBillSum(
 			ctx,
 			&billsv1.FixBillSumRequest{
@@ -72,7 +70,7 @@ func ReturnTransactions(trans []*models.Transaction) (resTrans []*transv1.Transa
 			Id:         tr.Id.String(),
 			Date:       timestamppb.New(tr.Date),
 			TransType:  int32(tr.TransType),
-			Sum:        float32(sumFoProto),
+			Sum:        sumFoProto,
 			Comment:    tr.Comment,
 			IdCategory: tr.Comment,
 			DebtType:   tr.DebtType,
