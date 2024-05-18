@@ -25,6 +25,20 @@ services:
       - piglet-transactions/transactions.env
     restart: unless-stopped
 
+  piglet-gateway:
+    image: "piglet-gateway:0.1.0"
+    container_name: piglet-gateway
+    ports:
+      - "127.0.0.1:8083:8083"
+    env_file:
+      - piglet-gateway/manage.env
+    depends_on:
+      piglet-transactions:
+        condition: service_started
+      piglet-bills:
+        condition: service_started
+    restart: unless-stopped
+
   bills-psql:
     image: "postgres:16.2"
     container_name: bills-psql
