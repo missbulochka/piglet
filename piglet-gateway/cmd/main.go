@@ -3,18 +3,19 @@ package main
 import (
 	"context"
 	"fmt"
-	transv1 "github.com/missbulochka/protos/gen/piglet-transactions"
-	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
-	"piglet-manager-service/internal/config"
 	"syscall"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	billsv1 "github.com/missbulochka/protos/gen/piglet-bills"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
+	billsv1 "github.com/missbulochka/protos/gen/piglet-bills"
+	transv1 "github.com/missbulochka/protos/gen/piglet-transactions"
+	"piglet-manager-service/internal/config"
 )
 
 func main() {
@@ -56,13 +57,9 @@ func main() {
 	}
 
 	// Start HTTP server
-	log.Println("Starting HTTP server...")
+	log.Println("starting HTTP server...")
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", cfg.GRPC.GatewayPort), mux); err != nil {
 		log.Fatal(err)
 	}
+	log.Println("server started")
 }
-
-// 	log.Println("starting HTTP server on port 8080")
-//	if err := http.ListenAndServe(":8080", mux); err != nil {
-//		log.Fatalf("failed to serve HTTP: %v", err)
-//	}
