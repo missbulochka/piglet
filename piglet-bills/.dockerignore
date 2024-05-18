@@ -1,0 +1,6 @@
+.dockerignore
+README.md
+.devcontainer/
+docker/
+pg-storage-bills/
+scripts/

@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  dev_piglet-bills:
+    build:
+      context: ../..
+      dockerfile: piglet-bills/.devcontainer/base.build.Dockerfile
+    container_name: dev_piglet-bills
+    command: tail -f /dev/null
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      bills-psql:
+        condition: service_healthy
+      piglet-transactions:
+        condition: service_started
+    env_file:
+      - ../bills.env
+    volumes:
+      - ../:/workspaces/dev_piglet
+    restart: unless-stopped
+
+  piglet-transactions:
+    image: piglet-transactions:0.1.0
+    container_name: piglet-transactions
+    ports:
+      - "127.0.0.1:8081:8081"
+    depends_on:
+      bills-psql:
+        condition: service_healthy
+    env_file:
+      - ../../piglet-transactions/transactions.env
+    restart: unless-stopped
+
+  bills-psql:
+    image: "postgres:16.2"
+    container_name: bills-psql
+    ports:
+      - "127.0.0.1:5432:5432"
+    env_file:
+      - ../pg-db.env
+    volumes:
+      - ../pg-storage-bills:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  transactions-psql:
+    image: "postgres:16.2"
+    container_name: transactions-psql
+    ports:
+      - "127.0.0.1:5433:5432"
+    env_file:
+      -  ../../piglet-transactions/pg-db.env
+    volumes:
+      - ../../piglet-transactions/pg-storage-trans:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pg-storage-bills:
+  pg-storage-trans:

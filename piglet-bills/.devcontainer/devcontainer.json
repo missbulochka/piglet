@@ -1,0 +1,19 @@
+{
+  "name": "dev_piglet-bills",
+  "dockerComposeFile": [
+    "docker-compose.yml"
+  ],
+  "service": "dev_piglet-bills",
+  "runServices": [
+    "bills-psql",
+    "piglet-transactions",
+    "transactions-psql"
+  ],
+  "forwardPorts": [
+    8080,
+  ],
+  "remoteUser": "builder",
+  "updateRemoteUserUID": false,
+  "workspaceFolder": "/workspaces/dev_piglet",
+  "shutdownAction": "stopCompose"
+}
